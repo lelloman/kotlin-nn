@@ -39,12 +39,13 @@ class NaiveTrainingIntegrationTest {
                 }
                 .build()
         val epochs = 100
-        val eta = 0.01
+        val eta = 0.05
         val callback = object : Training.EpochCallback {
-            override fun onEpoch(epoch: Int, loss: Double, accuracy: Double, finished: Boolean) {
-                println("epoch $epoch loss $loss accuracy $accuracy")
+            override fun onEpoch(epoch: Int, trainingLoss: Double, validationLoss: Double, finished: Boolean) {
+                println("epoch $epoch training loss $trainingLoss valid loss $validationLoss")
             }
         }
-        NaiveTraining(network, trainingSet, validationSet, epochs, callback, eta).perform()
+        val training = NaiveTraining(network, trainingSet, validationSet, epochs, callback, eta)
+        training.perform()
     }
 }

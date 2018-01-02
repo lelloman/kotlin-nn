@@ -10,7 +10,7 @@ abstract class Training(protected val network: Network,
                         protected val callback: EpochCallback) {
 
     interface EpochCallback {
-        fun onEpoch(epoch: Int, loss: Double, accuracy: Double, finished: Boolean)
+        fun onEpoch(epoch: Int, trainingLoss: Double, validationLoss: Double, finished: Boolean)
     }
 
     init {
@@ -23,13 +23,12 @@ abstract class Training(protected val network: Network,
 
     abstract fun perform()
 
-    fun computeAccuracy() = validationSet.map { inSample, outSample ->
+    fun validationLoss() = validationSet.map { inSample, outSample ->
         network.forwardPass(inSample)
                 .mapIndexed { index, y ->
                     Math.pow(y - outSample[index], 2.0)
                 }
-                .reduce { a, b -> a + b }
-    }
-            .average()
+                .sum()
+    }.average()
 
 }
