@@ -33,7 +33,7 @@ class NaiveTraining(network: Network,
             val outputLayer = network.layerAt(outputLayerIndex)
             val outputLayerError = neuronErrors[outputLayerIndex]
             val outputLayerGradients = weightGradients[outputLayerIndex]
-            val prevActivation = outputLayer.prevLayer!!.activation
+            var prevActivation = outputLayer.prevLayer!!.activation
 
             var outputWeightOffset = 0
             for (i in 0 until activation.size) {
@@ -48,6 +48,40 @@ class NaiveTraining(network: Network,
             }
 
             outputLayer.deltaWeights(outputLayerGradients)
+
+            for (layerIndex in network.size - 2 until 1) {
+                val layer = network.layerAt(layerIndex)
+                if (layer.isTrainable().not()) {
+                    continue
+                }
+
+                val activation = layer.activation
+                val nextLayer = network.layerAt(layerIndex + 1)
+                val prevWeightStep = activation.size + (if (nextLayer.hasBias) 1 else 0)
+                val layerError = neuronErrors[layerIndex]
+                val layerGradients = weightGradients[layerIndex]
+                prevActivation = layer.prevLayer!!.activation
+
+                var weightOffset = 0
+                for (i in 0 until activation.size) {
+                    var deltaError = 0.0
+                    var prevWeightIndex = i
+                    for (j in 0 until prevActivation.size) {
+                        deltaError += prevActivation[j] * nextLayer.weightAt(prevWeightIndex)
+                        prevWeightIndex += prevWeightStep
+                    }
+                    deltaError *= layer.activationDerivative(i)
+                    layerError[layerIndex] = deltaError
+
+                    for (j in 0 until layer.prevLayer!!.size) {
+                        layerGradients[weightOffset++] = eta * deltaError * prevActivation[j]
+                    }
+                    if (layer.hasBias) {
+                        layerGradients[weightOffset++] = eta * deltaError
+                    }
+                }
+                layer.deltaWeights(layerGradients)
+            }
         }
 
         return loss

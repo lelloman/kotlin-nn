@@ -38,9 +38,13 @@ class Layer private constructor(val size: Int, val prevLayer: Layer?, val hasBia
         delta.forEachIndexed { index, d -> weights[index] += d }
     }
 
+    fun weightAt(index: Int) = weights[index]
+
     fun setActivation(activation: DoubleArray) {
         System.arraycopy(activation, 0, this.activation, 0, activation.size)
     }
+
+    fun isTrainable() = isInput.not()
 
     fun computeActivation() {
         val prevActivation = prevLayer!!.activation
