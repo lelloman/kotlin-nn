@@ -38,4 +38,22 @@ class DataSet(val input: Array<DoubleArray>, val output: Array<DoubleArray>) {
         action(input[it], output[it])
     }
 
+    inline fun <reified T> map(action: (inSample: DoubleArray, outSample: DoubleArray) -> T)
+            = Array(size, { action(input[it], output[it]) })
+
+    class Builder(private val size: Int) {
+        private val input = mutableListOf<DoubleArray>()
+        private val output = mutableListOf<DoubleArray>()
+
+        fun add(action: (index: Int) -> Pair<DoubleArray, DoubleArray>): Builder {
+            (0 until size).forEach {
+                val sample = action(it)
+                input.add(sample.first)
+                output.add(sample.second)
+            }
+            return this
+        }
+
+        fun build() = DataSet(input.toTypedArray(), output.toTypedArray())
+    }
 }
