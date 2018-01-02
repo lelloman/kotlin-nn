@@ -1,5 +1,6 @@
 package com.lelloman.kotlinnn
 
+import com.lelloman.kotlinnn.layer.Layer
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 

@@ -1,5 +1,6 @@
 package com.lelloman.kotlinnn
 
+import com.lelloman.kotlinnn.layer.Layer
 import java.util.*
 
 class Network private constructor(private val layers: Array<Layer>) {
@@ -44,7 +45,7 @@ class Network private constructor(private val layers: Array<Layer>) {
             val rnd = Random()
             (1 until layers.size)
                     .map { layers[it] }
-                    .forEach { it.setWeights(DoubleArray(it.weightsSize, { rnd.nextDouble() * .2 })) }
+                    .forEach { it.setWeights(DoubleArray(it.weightsSize, { rnd.nextGaussian() * .3 })) }
 
             return Network(layers.toTypedArray())
         }

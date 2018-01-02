@@ -1,9 +1,12 @@
-package com.lelloman.kotlinnn
+package com.lelloman.kotlinnn.layer
 
-class Layer private constructor(val size: Int, val prevLayer: Layer?, val hasBias: Boolean) {
+class Layer private constructor(val size: Int,
+                                val prevLayer: Layer?,
+                                val hasBias: Boolean,
+                                private val activationFunction: ActivationFunction) {
 
     val isInput = prevLayer == null
-    val activation = DoubleArray(size)
+    val activation: DoubleArray = DoubleArray(size)
     val weightsSize: Int by lazy { weights.size }
 
     private val neuronConnections: Int
@@ -59,18 +62,17 @@ class Layer private constructor(val size: Int, val prevLayer: Layer?, val hasBia
             if (hasBias) {
                 v += weights[weightOffset++]
             }
-            activation[i] = activationFunction(v)
+            activation[i] = activationFunction.perform(v)
         }
     }
 
-    fun activationDerivative(index: Int) = activation[index] * (1 - activation[index])
-
-    private fun activationFunction(x: Double) = 1.0 / (1.0 + Math.exp(-x))
+    fun activationDerivative(index: Int) = activationFunction.derivative(activation[index])
 
     class Builder {
         private var size: Int? = null
         private var prevLayer: Layer? = null
         private var hasBias = true
+        private var activation: ActivationFunction = LogisticActivation
 
         fun size(size: Int): Builder {
             this.size = size
@@ -87,12 +89,17 @@ class Layer private constructor(val size: Int, val prevLayer: Layer?, val hasBia
             return this
         }
 
+        fun activation(activationFunction: ActivationFunction): Builder {
+            this.activation = activationFunction
+            return this
+        }
+
         fun build(): Layer {
             if (size == null) {
                 throw IllegalStateException("Must set layer size")
             }
 
-            return Layer(size!!, prevLayer, hasBias)
+            return Layer(size!!, prevLayer, hasBias, activation)
         }
     }
 

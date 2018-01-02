@@ -3,12 +3,12 @@ package com.lelloman.kotlinnn.training
 import com.lelloman.kotlinnn.DataSet
 import com.lelloman.kotlinnn.Network
 
-class NaiveTraining(network: Network,
-                    trainingSet: DataSet,
-                    validationSet: DataSet,
-                    epochs: Int,
-                    callback: Training.EpochCallback,
-                    private val eta: Double = 0.01)
+class OnlineTraining(network: Network,
+                     trainingSet: DataSet,
+                     validationSet: DataSet,
+                     epochs: Int,
+                     callback: Training.EpochCallback,
+                     private val eta: Double = 0.01)
     : Training(network, trainingSet, validationSet, epochs, callback) {
 
     private val neuronErrors: Array<DoubleArray> = Array(network.size, { DoubleArray(network.layerAt(it).size) })
