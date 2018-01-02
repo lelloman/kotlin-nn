@@ -59,14 +59,11 @@ class NaiveTrainingIntegrationTest {
                     doubleArrayOf(x) to doubleArrayOf(y)
                 }
                 .build()
-        val epochs = 50
-        val eta = 0.05
-        var prevLoss = Double.MAX_VALUE
+        val epochs = 100
+        val eta = 0.5
         val callback = object : Training.EpochCallback {
             override fun onEpoch(epoch: Int, trainingLoss: Double, validationLoss: Double, finished: Boolean) {
                 println("epoch $epoch training loss $trainingLoss valid loss $validationLoss")
-                assertThat(prevLoss).isGreaterThan(trainingLoss)
-                prevLoss = trainingLoss
 
                 val img = createImg()
                 for (x in 0 until imgSize.toInt()) {
@@ -103,49 +100,39 @@ class NaiveTrainingIntegrationTest {
         val inputLayer = Layer.Builder()
                 .size(1)
                 .build()
-        val hiddenLayer1 = Layer.Builder()
-                .size(20)
+        val hiddenLayer = Layer.Builder()
+                .size(150)
                 .prevLayer(inputLayer)
-                .build()
-        val hiddenLayer2 = Layer.Builder()
-                .size(20)
-                .prevLayer(hiddenLayer1)
                 .build()
         val outputLayer = Layer.Builder()
                 .size(1)
-                .prevLayer(hiddenLayer2)
+                .prevLayer(hiddenLayer)
                 .build()
         val network = Network.Builder()
                 .addLayer(inputLayer)
-                .addLayer(hiddenLayer1)
-                .addLayer(hiddenLayer2)
+                .addLayer(hiddenLayer)
                 .addLayer(outputLayer)
                 .build()
-//        val f = { x: Double -> .9 * x + 0.2 }
-        val f = { x: Double -> Math.abs(Math.sin(x * Math.PI)) }
-        val trainingSet = DataSet.Builder(200)
+        val f = { x: Double -> (1.0+ Math.sin(x * Math.PI*3)) / 2.0 }
+        val trainingSet = DataSet.Builder(1000)
                 .add {
-                    val x = random.nextDouble()
-                    val y = f(x)
+                    val x = random.nextDouble() * .8 + .1
+                    val y = f(x) * .8 + .1
                     doubleArrayOf(x) to doubleArrayOf(y)
                 }
                 .build()
         val validationSet = DataSet.Builder(200)
                 .add {
-                    val x = random.nextDouble()
-                    val y = f(x)
+                    val x = random.nextDouble() * .8 + .1
+                    val y = f(x) * .8 + .1
                     doubleArrayOf(x) to doubleArrayOf(y)
                 }
                 .build()
-        val epochs = 100
+        val epochs = 1000
         val eta = 0.1
-        var prevLoss = Double.MAX_VALUE
         val callback = object : Training.EpochCallback {
             override fun onEpoch(epoch: Int, trainingLoss: Double, validationLoss: Double, finished: Boolean) {
                 println("epoch $epoch training loss $trainingLoss valid loss $validationLoss")
-//                assertThat(prevLoss).isGreaterThan(trainingLoss)
-                prevLoss = trainingLoss
-
                 val img = createImg()
                 for (x in 0 until imgSize.toInt()) {
                     val actual = network.forwardPass(doubleArrayOf(x / imgSize))

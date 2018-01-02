@@ -26,7 +26,7 @@ class NaiveTraining(network: Network,
         var loss = 0.0
 
         trainingSet.forEach { input, output ->
-            val activation = network.forwardPass(input).clone()
+            val activation = network.forwardPass(input)
             loss += activation.mapIndexed { index, v -> Math.pow(v - output[index], 2.0) }.sum() / trainingSet.size
 
             val outputLayerIndex = network.size - 1
@@ -49,7 +49,7 @@ class NaiveTraining(network: Network,
 
             outputLayer.deltaWeights(outputLayerGradients)
 
-            for (layerIndex in network.size - 2 until 1) {
+            for (layerIndex in network.size - 2 downTo 0) {
                 val layer = network.layerAt(layerIndex)
                 if (layer.isTrainable().not()) {
                     continue
@@ -57,7 +57,8 @@ class NaiveTraining(network: Network,
 
                 val activation = layer.activation
                 val nextLayer = network.layerAt(layerIndex + 1)
-                val prevWeightStep = activation.size + (if (nextLayer.hasBias) 1 else 0)
+                val nextLayerError = neuronErrors[layerIndex+1]
+                val nextWeightStep = activation.size + (if (nextLayer.hasBias) 1 else 0)
                 val layerError = neuronErrors[layerIndex]
                 val layerGradients = weightGradients[layerIndex]
                 prevActivation = layer.prevLayer!!.activation
@@ -65,13 +66,13 @@ class NaiveTraining(network: Network,
                 var weightOffset = 0
                 for (i in 0 until activation.size) {
                     var deltaError = 0.0
-                    var prevWeightIndex = i
-                    for (j in 0 until prevActivation.size) {
-                        deltaError += prevActivation[j] * nextLayer.weightAt(prevWeightIndex)
-                        prevWeightIndex += prevWeightStep
+                    var nextWeightIndex = i
+                    for (j in 0 until nextLayerError.size) {
+                        deltaError += nextLayerError[j] * nextLayer.weightAt(nextWeightIndex)
+                        nextWeightIndex += nextWeightStep
                     }
                     deltaError *= layer.activationDerivative(i)
-                    layerError[layerIndex] = deltaError
+                    layerError[i] = deltaError
 
                     for (j in 0 until layer.prevLayer!!.size) {
                         layerGradients[weightOffset++] = eta * deltaError * prevActivation[j]

@@ -44,7 +44,7 @@ class Network private constructor(private val layers: Array<Layer>) {
             val rnd = Random()
             (1 until layers.size)
                     .map { layers[it] }
-                    .forEach { it.setWeights(DoubleArray(it.weightsSize, { rnd.nextDouble() * .1 })) }
+                    .forEach { it.setWeights(DoubleArray(it.weightsSize, { rnd.nextDouble() * .2 })) }
 
             return Network(layers.toTypedArray())
         }

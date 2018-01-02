@@ -3,7 +3,6 @@ package com.lelloman.kotlinnn
 class Layer private constructor(val size: Int, val prevLayer: Layer?, val hasBias: Boolean) {
 
     val isInput = prevLayer == null
-    val z = DoubleArray(size)
     val activation = DoubleArray(size)
     val weightsSize: Int by lazy { weights.size }
 
@@ -29,7 +28,7 @@ class Layer private constructor(val size: Int, val prevLayer: Layer?, val hasBia
         System.arraycopy(weights, 0, this.weights, 0, weights.size)
     }
 
-    fun deltaWeights(delta: DoubleArray){
+    fun deltaWeights(delta: DoubleArray) {
         if (weights.size != delta.size) {
             throw IllegalArgumentException("Weight updates size is supposed to be ${weights.size} for this layer but" +
                     "argument has size ${delta.size}")
@@ -60,17 +59,15 @@ class Layer private constructor(val size: Int, val prevLayer: Layer?, val hasBia
             if (hasBias) {
                 v += weights[weightOffset++]
             }
-            z[i] = v
             activation[i] = activationFunction(v)
         }
     }
 
-    // derivative of tanh(x) = 1 - (tanh(x))^2
-    fun activationDerivative(index: Int) = 1 - Math.pow(activation[index], 2.0)
+    fun activationDerivative(index: Int) = activation[index] * (1 - activation[index])
 
-    private fun activationFunction(x: Double) = Math.tanh(x)
+    private fun activationFunction(x: Double) = 1.0 / (1.0 + Math.exp(-x))
 
-    class Builder() {
+    class Builder {
         private var size: Int? = null
         private var prevLayer: Layer? = null
         private var hasBias = true

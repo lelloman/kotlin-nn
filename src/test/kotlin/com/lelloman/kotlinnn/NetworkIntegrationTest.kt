@@ -6,6 +6,8 @@ import org.junit.Test
 
 class NetworkIntegrationTest {
 
+    private fun logistic(x: Double) = 1.0 / (1.0 + Math.exp(-x))
+    
     /*
         Network 1 ->
         I O
@@ -31,7 +33,7 @@ class NetworkIntegrationTest {
             doubleArrayOf(-0.25)
     )
 
-    private fun forwardPass1(input: Double, weights: DoubleArray) = doubleArrayOf(Math.tanh(0.0 + input * weights[0]))
+    private fun forwardPass1(input: Double, weights: DoubleArray) = doubleArrayOf(logistic(0.0 + input * weights[0]))
 
     @Test
     fun `check network 1 forward pass`() {
@@ -70,7 +72,7 @@ class NetworkIntegrationTest {
     )
 
     private fun forwardPass2(input: Double, weights: DoubleArray) =
-            doubleArrayOf(Math.tanh(input * weights[0] + weights[1]))
+            doubleArrayOf(logistic(input * weights[0] + weights[1]))
 
     @Test
     fun `check network 2 forward pass`() {
@@ -114,7 +116,7 @@ class NetworkIntegrationTest {
         v += input[0] * weights[0]
         v += input[1] * weights[1]
         v += weights[2]
-        return doubleArrayOf(Math.tanh(v))
+        return doubleArrayOf(logistic(v))
     }
 
     @Test
@@ -172,7 +174,7 @@ class NetworkIntegrationTest {
         v2 += input[1] * weights[4]
         v2 += weights[5]
 
-        return doubleArrayOf(Math.tanh(v1), Math.tanh(v2))
+        return doubleArrayOf(logistic(v1), logistic(v2))
     }
 
     @Test
@@ -239,8 +241,8 @@ class NetworkIntegrationTest {
         v12 += input[1] * w1[4]
         v12 += w1[5]
 
-        val h1 = Math.tanh(v11)
-        val h2 = Math.tanh(v12)
+        val h1 = logistic(v11)
+        val h2 = logistic(v12)
 
         var v21 = 0.0
         v21 += h1 * w2[0]
@@ -250,7 +252,7 @@ class NetworkIntegrationTest {
         v22 += h1 * w2[2]
         v22 += h2 * w2[3]
 
-        return doubleArrayOf(Math.tanh(v21), Math.tanh(v22))
+        return doubleArrayOf(logistic(v21), logistic(v22))
     }
 
     @Test
