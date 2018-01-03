@@ -25,9 +25,9 @@ class OnlineTraining(network: Network,
 
         var loss = 0.0
 
-        trainingSet.forEach { input, output ->
-            val activation = network.forwardPass(input)
-            loss += activation.mapIndexed { index, v -> Math.pow(v - output[index], 2.0) }.sum() / trainingSet.size
+        trainingSet.forEach { input, targetOutput ->
+            val outputActivation = network.forwardPass(input)
+            loss += outputActivation.mapIndexed { index, v -> Math.pow(v - targetOutput[index], 2.0) }.sum() / trainingSet.size
 
             val outputLayerIndex = network.size - 1
             val outputLayer = network.layerAt(outputLayerIndex)
@@ -36,10 +36,10 @@ class OnlineTraining(network: Network,
             var prevActivation = outputLayer.prevLayer!!.activation
 
             var outputWeightOffset = 0
-            for (i in 0 until activation.size) {
-                val deltaError = (output[i] - activation[i]) * outputLayer.activationDerivative(i)
+            for (i in 0 until outputActivation.size) {
+                val deltaError = (targetOutput[i] - outputActivation[i]) * outputLayer.activationDerivative(i)
                 outputLayerError[i] = deltaError
-                for (j in 0 until outputLayer.prevLayer!!.size) {
+                for (j in 0 until outputLayer.prevLayer.size) {
                     outputLayerGradients[outputWeightOffset++] = eta * deltaError * prevActivation[j]
                 }
                 if (outputLayer.hasBias) {
@@ -74,7 +74,7 @@ class OnlineTraining(network: Network,
                     deltaError *= layer.activationDerivative(i)
                     layerError[i] = deltaError
 
-                    for (j in 0 until layer.prevLayer!!.size) {
+                    for (j in 0 until layer.prevLayer.size) {
                         layerGradients[weightOffset++] = eta * deltaError * prevActivation[j]
                     }
                     if (layer.hasBias) {

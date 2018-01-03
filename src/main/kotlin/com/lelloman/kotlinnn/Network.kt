@@ -1,7 +1,6 @@
 package com.lelloman.kotlinnn
 
 import com.lelloman.kotlinnn.layer.Layer
-import java.util.*
 
 class Network private constructor(private val layers: Array<Layer>) {
 
@@ -22,9 +21,8 @@ class Network private constructor(private val layers: Array<Layer>) {
     class Builder {
         private val layers = mutableListOf<Layer>()
 
-        fun addLayer(layer: Layer): Builder {
+        fun addLayer(layer: Layer) = apply {
             layers.add(layer)
-            return this
         }
 
         fun build(): Network {

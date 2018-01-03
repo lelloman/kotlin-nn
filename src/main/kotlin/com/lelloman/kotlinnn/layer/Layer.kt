@@ -4,7 +4,7 @@ class Layer private constructor(val size: Int,
                                 val prevLayer: Layer?,
                                 val hasBias: Boolean,
                                 private val activationFunction: ActivationFunction,
-                                val weightsInitializer: WeightsInitializer) {
+                                private val weightsInitializer: WeightsInitializer) {
 
     val isInput = prevLayer == null
     val activation: DoubleArray = DoubleArray(size)
@@ -58,10 +58,7 @@ class Layer private constructor(val size: Int,
         var weightOffset = 0
 
         for (i in 0 until size) {
-            var v = 0.0
-            for (j in 0 until prevSize) {
-                v += prevActivation[j] * weights[weightOffset++]
-            }
+            var v = (0 until prevSize).sumByDouble { prevActivation[it] * weights[weightOffset++] }
             if (hasBias) {
                 v += weights[weightOffset++]
             }
@@ -78,26 +75,23 @@ class Layer private constructor(val size: Int,
         private var activation: ActivationFunction = LogisticActivation
         private var weightsInitializer: WeightsInitializer = GaussianWeightsInitializer(0.0, 0.3)
 
-        fun size(size: Int): Builder {
+        fun size(size: Int) = apply {
             this.size = size
-            return this
         }
 
-        fun prevLayer(layer: Layer): Builder {
+        fun prevLayer(layer: Layer) = apply {
             prevLayer = layer
-            return this
         }
 
-        fun noBias(): Builder {
+        fun noBias() = apply {
             hasBias = false
-            return this
         }
 
-        fun activation(activationFunction: ActivationFunction): Builder = this.apply {
+        fun activation(activationFunction: ActivationFunction) = apply {
             this.activation = activationFunction
         }
 
-        fun weightsInitializer(weightsInitializer: WeightsInitializer): Builder = this. apply {
+        fun weightsInitializer(weightsInitializer: WeightsInitializer) = apply {
             this.weightsInitializer = weightsInitializer
         }
 
