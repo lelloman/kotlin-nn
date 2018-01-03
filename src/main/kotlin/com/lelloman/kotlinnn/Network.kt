@@ -40,12 +40,11 @@ class Network private constructor(private val layers: Array<Layer>) {
                     .filter { layers[it].isInput }
                     .forEach { throw IllegalStateException("Layer $it is an input layer, only the first layer can be input") }
 
-            // TODO check for recurrent network
+            // TODO check for circular network
 
-            val rnd = Random()
-            (1 until layers.size)
-                    .map { layers[it] }
-                    .forEach { it.setWeights(DoubleArray(it.weightsSize, { rnd.nextGaussian() * .3 })) }
+            layers.forEach {
+                it.initializeWeights()
+            }
 
             return Network(layers.toTypedArray())
         }

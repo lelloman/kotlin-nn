@@ -3,7 +3,8 @@ package com.lelloman.kotlinnn.layer
 class Layer private constructor(val size: Int,
                                 val prevLayer: Layer?,
                                 val hasBias: Boolean,
-                                private val activationFunction: ActivationFunction) {
+                                private val activationFunction: ActivationFunction,
+                                val weightsInitializer: WeightsInitializer) {
 
     val isInput = prevLayer == null
     val activation: DoubleArray = DoubleArray(size)
@@ -30,6 +31,8 @@ class Layer private constructor(val size: Int,
 
         System.arraycopy(weights, 0, this.weights, 0, weights.size)
     }
+
+    fun initializeWeights() = weightsInitializer.initialize(this.weights)
 
     fun deltaWeights(delta: DoubleArray) {
         if (weights.size != delta.size) {
@@ -73,6 +76,7 @@ class Layer private constructor(val size: Int,
         private var prevLayer: Layer? = null
         private var hasBias = true
         private var activation: ActivationFunction = LogisticActivation
+        private var weightsInitializer: WeightsInitializer = GaussianWeightsInitializer(0.0, 0.3)
 
         fun size(size: Int): Builder {
             this.size = size
@@ -89,9 +93,12 @@ class Layer private constructor(val size: Int,
             return this
         }
 
-        fun activation(activationFunction: ActivationFunction): Builder {
+        fun activation(activationFunction: ActivationFunction): Builder = this.apply {
             this.activation = activationFunction
-            return this
+        }
+
+        fun weightsInitializer(weightsInitializer: WeightsInitializer): Builder = this. apply {
+            this.weightsInitializer = weightsInitializer
         }
 
         fun build(): Layer {
@@ -99,7 +106,7 @@ class Layer private constructor(val size: Int,
                 throw IllegalStateException("Must set layer size")
             }
 
-            return Layer(size!!, prevLayer, hasBias, activation)
+            return Layer(size!!, prevLayer, hasBias, activation, weightsInitializer)
         }
     }
 

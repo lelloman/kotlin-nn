@@ -1,5 +1,7 @@
-package com.lelloman.kotlinnn
+package com.lelloman.kotlinnn.logicgateslearning
 
+import com.lelloman.kotlinnn.DataSet
+import com.lelloman.kotlinnn.Network
 import com.lelloman.kotlinnn.layer.*
 import com.lelloman.kotlinnn.training.OnlineTraining
 import com.lelloman.kotlinnn.training.Training
@@ -38,10 +40,12 @@ class XorTrainingIntegrationTest {
 
     private val logisticNetwork = makeNetwork(LogisticActivation)
     private val tanhNetwork = makeNetwork(TanhActivation)
-    private val reluNetwork = makeNetwork(ReluActivation)
+    private val reluNetwork = makeNetwork(ReluActivation, GaussianWeightsInitializer(0.4, 0.2))
     private val leakyReluNetwork = makeNetwork(LeakyReluActivation)
 
-    private fun makeNetwork(activation: ActivationFunction): Network {
+    private fun makeNetwork(activation: ActivationFunction,
+                            weightsInitializer: WeightsInitializer = GaussianWeightsInitializer(0.0, 0.3))
+            : Network {
         val inputLayer = Layer.Builder()
                 .size(2)
                 .activation(activation)
@@ -50,11 +54,13 @@ class XorTrainingIntegrationTest {
                 .size(10)
                 .activation(activation)
                 .prevLayer(inputLayer)
+                .weightsInitializer(weightsInitializer)
                 .build()
         val outputLayer = Layer.Builder()
                 .size(1)
                 .activation(activation)
                 .prevLayer(hiddenLayer)
+                .weightsInitializer(weightsInitializer)
                 .build()
         return Network.Builder()
                 .addLayer(inputLayer)
