@@ -11,6 +11,7 @@ abstract class Training(protected val network: Network,
 
     interface EpochCallback {
         fun onEpoch(epoch: Int, trainingLoss: Double, validationLoss: Double, finished: Boolean)
+        fun shouldEndTraining(trainingLoss: Double, validationLoss: Double) = false
     }
 
     init {

@@ -3,6 +3,7 @@ package com.lelloman.kotlinnn.logicgateslearning
 import com.lelloman.kotlinnn.DataSet
 import com.lelloman.kotlinnn.Network
 import com.lelloman.kotlinnn.layer.*
+import com.lelloman.kotlinnn.training.BatchTraining
 import com.lelloman.kotlinnn.training.OnlineTraining
 import com.lelloman.kotlinnn.training.Training
 import org.assertj.core.api.Assertions
@@ -17,23 +18,25 @@ abstract class LogicGateTrainingTest {
     protected fun Double.toBoolean() = roundToInt() == 1
     private fun Boolean.toDouble() = if (this) 1.0 else 0.0
 
-    abstract val f: (Double, Double) -> Boolean
+    abstract fun f(a: Double, b: Double): Boolean
     abstract val label: String
 
-    private val sample = { _: Int ->
+    private val lossThreshold = 0.001
+
+    private fun sample(index: Int): Pair<DoubleArray, DoubleArray>{
         val x = doubleArrayOf(random.nextBoolean().toDouble(), random.nextBoolean().toDouble())
         val y = f(x[0], x[1])
-        x to doubleArrayOf(if (y) 1.0 else 0.0)
+        return x to doubleArrayOf(if (y) 1.0 else 0.0)
     }
 
     private val trainingSet by lazy {
         DataSet.Builder(1000)
-                .add(sample)
+                .add(::sample)
                 .build()
     }
     private val validationSet by lazy {
         DataSet.Builder(1000)
-                .add(sample)
+                .add(::sample)
                 .build()
     }
 
@@ -42,8 +45,11 @@ abstract class LogicGateTrainingTest {
             println("epoch $epoch training loss $trainingLoss validation loss $validationLoss")
         }
 
+        override fun shouldEndTraining(trainingLoss: Double, validationLoss: Double) = validationLoss < lossThreshold
+
     }
-    private val epochs = 100
+
+    private val epochs = 1000
 
     private val logisticNetwork = makeNetwork({ size -> LogisticActivation(size) })
     private val tanhNetwork = makeNetwork({ size -> TanhActivation(size) })
@@ -77,42 +83,82 @@ abstract class LogicGateTrainingTest {
     }
 
     @Test
-    fun `learns logic gate with logistic activation multilayer`() {
+    fun `online learns logic gate with logistic activation multilayer`() {
         println("Training $label logistic activation...")
         val training = OnlineTraining(logisticNetwork, trainingSet, validationSet, epochs, callback, 0.1)
         training.perform()
 
         val loss = training.validationLoss()
-        Assertions.assertThat(loss).isLessThan(0.001)
+        Assertions.assertThat(loss).isLessThan(lossThreshold)
     }
 
     @Test
-    fun `learns logic gate with tanh activation multilayer`() {
+    fun `batch learns logic gate with logistic activation multilayer`() {
+        println("Training $label logistic activation...")
+        val training = BatchTraining(logisticNetwork, trainingSet, validationSet, epochs*2, callback, 0.02)
+        training.perform()
+
+        val loss = training.validationLoss()
+        Assertions.assertThat(loss).isLessThan(lossThreshold)
+    }
+
+    @Test
+    fun `online learns logic gate with tanh activation multilayer`() {
         println("Training $label tanh activation...")
         val training = OnlineTraining(tanhNetwork, trainingSet, validationSet, epochs, callback, 0.1)
         training.perform()
 
         val loss = training.validationLoss()
-        Assertions.assertThat(loss).isLessThan(0.001)
+        Assertions.assertThat(loss).isLessThan(lossThreshold)
     }
 
     @Test
-    fun `learns logic gate with ReLU activation multilayer`() {
+    fun `batch learns logic gate with tanh activation multilayer`() {
+        println("Training $label tanh activation...")
+        val training = BatchTraining(tanhNetwork, trainingSet, validationSet, epochs, callback, 0.0005)
+        training.perform()
+
+        val loss = training.validationLoss()
+        Assertions.assertThat(loss).isLessThan(lossThreshold)
+    }
+
+    @Test
+    fun `online learns logic gate with ReLU activation multilayer`() {
         println("Training $label ReLU activation...")
         val training = OnlineTraining(reluNetwork, trainingSet, validationSet, epochs, callback, 0.01)
         training.perform()
 
         val loss = training.validationLoss()
-        Assertions.assertThat(loss).isLessThan(0.001)
+        Assertions.assertThat(loss).isLessThan(lossThreshold)
     }
 
     @Test
-    fun `learns logic gate with leaky ReLU activation multilayer`() {
+    fun `batch learns logic gate with ReLU activation multilayer`() {
+        println("Training $label ReLU activation...")
+        val training = BatchTraining(reluNetwork, trainingSet, validationSet, epochs, callback, 0.0005)
+        training.perform()
+
+        val loss = training.validationLoss()
+        Assertions.assertThat(loss).isLessThan(lossThreshold)
+    }
+
+    @Test
+    fun `online learns logic gate with leaky ReLU activation multilayer`() {
         println("Training $label leaky ReLU activation...")
         val training = OnlineTraining(leakyReluNetwork, trainingSet, validationSet, epochs, callback, 0.1)
         training.perform()
 
         val loss = training.validationLoss()
-        Assertions.assertThat(loss).isLessThan(0.001)
+        Assertions.assertThat(loss).isLessThan(lossThreshold)
+    }
+
+    @Test
+    fun `batch learns logic gate with leaky ReLU activation multilayer`() {
+        println("Training $label leaky ReLU activation...")
+        val training = BatchTraining(leakyReluNetwork, trainingSet, validationSet, epochs, callback, 0.0005)
+        training.perform()
+
+        val loss = training.validationLoss()
+        Assertions.assertThat(loss).isLessThan(lossThreshold)
     }
 }
