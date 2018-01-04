@@ -45,27 +45,27 @@ abstract class LogicGateTrainingTest {
     }
     private val epochs = 100
 
-    private val logisticNetwork = makeNetwork(LogisticActivation)
-    private val tanhNetwork = makeNetwork(TanhActivation)
-    private val reluNetwork = makeNetwork(ReluActivation, GaussianWeightsInitializer(0.4, 0.2))
-    private val leakyReluNetwork = makeNetwork(LeakyReluActivation)
+    private val logisticNetwork = makeNetwork({ size -> LogisticActivation(size) })
+    private val tanhNetwork = makeNetwork({ size -> TanhActivation(size) })
+    private val reluNetwork = makeNetwork({ size -> ReluActivation(size) }, GaussianWeightsInitializer(0.5, 0.2))
+    private val leakyReluNetwork = makeNetwork({ size -> LeakyReluActivation(size) })
 
-    private fun makeNetwork(activation: ActivationFunction,
+    private fun makeNetwork(activationFactory: (Int) -> LayerActivation,
                             weightsInitializer: WeightsInitializer = GaussianWeightsInitializer(0.0, 0.3))
             : Network {
         val inputLayer = Layer.Builder()
                 .size(2)
-                .activation(activation)
+                .activation(activationFactory)
                 .build()
         val hiddenLayer = Layer.Builder()
                 .size(10)
-                .activation(activation)
+                .activation(activationFactory)
                 .prevLayer(inputLayer)
                 .weightsInitializer(weightsInitializer)
                 .build()
         val outputLayer = Layer.Builder()
                 .size(1)
-                .activation(activation)
+                .activation(activationFactory)
                 .prevLayer(hiddenLayer)
                 .weightsInitializer(weightsInitializer)
                 .build()
@@ -77,7 +77,7 @@ abstract class LogicGateTrainingTest {
     }
 
     @Test
-    fun `learns OR with logistic activation multilayer`() {
+    fun `learns logic gate with logistic activation multilayer`() {
         println("Training $label logistic activation...")
         val training = OnlineTraining(logisticNetwork, trainingSet, validationSet, epochs, callback, 0.1)
         training.perform()
@@ -87,7 +87,7 @@ abstract class LogicGateTrainingTest {
     }
 
     @Test
-    fun `learns OR with tanh activation multilayer`() {
+    fun `learns logic gate with tanh activation multilayer`() {
         println("Training $label tanh activation...")
         val training = OnlineTraining(tanhNetwork, trainingSet, validationSet, epochs, callback, 0.1)
         training.perform()
@@ -97,7 +97,7 @@ abstract class LogicGateTrainingTest {
     }
 
     @Test
-    fun `learns OR with ReLU activation multilayer`() {
+    fun `learns logic gate with ReLU activation multilayer`() {
         println("Training $label ReLU activation...")
         val training = OnlineTraining(reluNetwork, trainingSet, validationSet, epochs, callback, 0.01)
         training.perform()
@@ -107,7 +107,7 @@ abstract class LogicGateTrainingTest {
     }
 
     @Test
-    fun `learns OR with leaky ReLU activation multilayer`() {
+    fun `learns logic gate with leaky ReLU activation multilayer`() {
         println("Training $label leaky ReLU activation...")
         val training = OnlineTraining(leakyReluNetwork, trainingSet, validationSet, epochs, callback, 0.1)
         training.perform()

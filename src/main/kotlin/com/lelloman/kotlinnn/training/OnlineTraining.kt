@@ -33,7 +33,7 @@ class OnlineTraining(network: Network,
             val outputLayer = network.layerAt(outputLayerIndex)
             val outputLayerError = neuronErrors[outputLayerIndex]
             val outputLayerGradients = weightGradients[outputLayerIndex]
-            var prevActivation = outputLayer.prevLayer!!.activation
+            var prevActivation = outputLayer.prevLayer!!.output
 
             var outputWeightOffset = 0
             for (i in 0 until outputActivation.size) {
@@ -55,13 +55,13 @@ class OnlineTraining(network: Network,
                     continue
                 }
 
-                val activation = layer.activation
+                val activation = layer.output
                 val nextLayer = network.layerAt(layerIndex + 1)
                 val nextLayerError = neuronErrors[layerIndex+1]
                 val nextWeightStep = activation.size + (if (nextLayer.hasBias) 1 else 0)
                 val layerError = neuronErrors[layerIndex]
                 val layerGradients = weightGradients[layerIndex]
-                prevActivation = layer.prevLayer!!.activation
+                prevActivation = layer.prevLayer!!.output
 
                 var weightOffset = 0
                 for (i in 0 until activation.size) {

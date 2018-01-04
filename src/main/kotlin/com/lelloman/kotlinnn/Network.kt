@@ -13,7 +13,7 @@ class Network private constructor(private val layers: Array<Layer>) {
 
         forwardLayers.forEach { it.computeActivation() }
 
-        return layers.last().activation
+        return layers.last().output
     }
 
     fun layerAt(index: Int) = layers[index]
