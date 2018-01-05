@@ -9,7 +9,9 @@ class BatchTraining(network: Network,
                     validationSet: DataSet,
                     epochs: Int,
                     callback: Training.EpochCallback,
-                    private val eta: Double = 0.01)    : Training(network, trainingSet, validationSet, epochs, callback) {
+                    private val eta: Double = 0.01,
+                    private val batchSize: Int = trainingSet.size)
+    : Training(network, trainingSet, validationSet, epochs, callback) {
 
     private val neuronErrors: Array<DoubleArray> = Array(network.size, { DoubleArray(network.layerAt(it).size) })
     private val weightGradients: Array<DoubleArray> = Array(network.size, { DoubleArray(network.layerAt(it).weightsSize) })
@@ -35,6 +37,8 @@ class BatchTraining(network: Network,
 
         weightGradients.forEach { Arrays.fill(it, 0.0) }
 
+        var sampleIndex = 0
+
         trainingSet.forEach { input, targetOutput ->
             val outputActivation = network.forwardPass(input)
             loss += outputActivation.mapIndexed { index, v -> Math.pow(v - targetOutput[index], 2.0) }.sum() / trainingSet.size
@@ -56,8 +60,6 @@ class BatchTraining(network: Network,
                     outputLayerGradients[outputWeightOffset++] += eta * deltaError
                 }
             }
-
-//            outputLayer.deltaWeights(outputLayerGradients)
 
             for (layerIndex in network.size - 2 downTo 0) {
                 val layer = network.layerAt(layerIndex)
@@ -91,7 +93,13 @@ class BatchTraining(network: Network,
                         layerGradients[weightOffset++] += eta * deltaError
                     }
                 }
-//                layer.deltaWeights(layerGradients)
+            }
+
+            if(sampleIndex++ >= batchSize){
+                (0 until network.size).forEach {
+                    network.layerAt(it).deltaWeights(weightGradients[it])
+                    Arrays.fill(weightGradients[it], 0.0)
+                }
             }
         }
 
