@@ -2,9 +2,10 @@ package com.lelloman.kotlinnn.logicgateslearning
 
 import com.lelloman.kotlinnn.DataSet
 import com.lelloman.kotlinnn.Network
+import com.lelloman.kotlinnn.Training
 import com.lelloman.kotlinnn.layer.*
+import com.lelloman.kotlinnn.optimizer.SGD
 import com.lelloman.kotlinnn.toDouble
-import com.lelloman.kotlinnn.training.Training
 import org.assertj.core.api.Assertions
 import org.junit.Test
 import java.util.*
@@ -72,7 +73,7 @@ abstract class LogicGateTrainingTest {
     @Test
     fun `online learns logic gate with logistic activation multilayer`() {
         println("Training $label logistic activation...")
-        val training = Training(logisticNetwork, trainingSet, validationSet, epochs, callback, 0.1, 10)
+        val training = Training(logisticNetwork, trainingSet, validationSet, epochs, callback, SGD(0.1), 10)
         training.perform()
 
         val loss = training.validationLoss()
@@ -82,7 +83,7 @@ abstract class LogicGateTrainingTest {
     @Test
     fun `online learns logic gate with tanh activation multilayer`() {
         println("Training $label tanh activation...")
-        val training = Training(tanhNetwork, trainingSet, validationSet, epochs, callback, 0.1, 10)
+        val training = Training(tanhNetwork, trainingSet, validationSet, epochs, callback, SGD(0.01), 10)
         training.perform()
 
         val loss = training.validationLoss()
@@ -92,7 +93,7 @@ abstract class LogicGateTrainingTest {
     @Test
     fun `online learns logic gate with ReLU activation multilayer`() {
         println("Training $label ReLU activation...")
-        val training = Training(reluNetwork, trainingSet, validationSet, epochs, callback, 0.01, 10)
+        val training = Training(reluNetwork, trainingSet, validationSet, epochs, callback, SGD(0.01), 10)
         training.perform()
 
         val loss = training.validationLoss()
@@ -102,7 +103,7 @@ abstract class LogicGateTrainingTest {
     @Test
     fun `online learns logic gate with leaky ReLU activation multilayer`() {
         println("Training $label leaky ReLU activation...")
-        val training = Training(leakyReluNetwork, trainingSet, validationSet, epochs, callback, 0.1, 10)
+        val training = Training(leakyReluNetwork, trainingSet, validationSet, epochs, callback, SGD(0.1), 10)
         training.perform()
 
         val loss = training.validationLoss()

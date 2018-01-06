@@ -1,7 +1,7 @@
 package com.lelloman.kotlinnn
 
 import com.lelloman.kotlinnn.layer.*
-import com.lelloman.kotlinnn.training.Training
+import com.lelloman.kotlinnn.optimizer.SGD
 import org.assertj.core.api.Assertions
 import org.junit.Test
 import java.util.*
@@ -67,7 +67,7 @@ class TrainingIntegrationTest {
     @Test
     fun `batch size 10 XOR with logistic activation`() {
         println("Training XOR batch size 10 logistic activation...")
-        val training = Training(logisticNetwork, trainingSet, validationSet, epochs, callback, eta, 10)
+        val training = Training(logisticNetwork, trainingSet, validationSet, epochs, callback, SGD(eta), 10)
         training.perform()
 
         val loss = training.validationLoss()
@@ -77,7 +77,7 @@ class TrainingIntegrationTest {
     @Test
     fun `batch size 100 XOR with logistic activation`() {
         println("Training XOR batch size 100 logistic activation...")
-        val training = Training(logisticNetwork, trainingSet, validationSet, epochs, callback, eta, 100)
+        val training = Training(logisticNetwork, trainingSet, validationSet, epochs, callback, SGD(eta), 100)
         training.perform()
 
         val loss = training.validationLoss()
@@ -87,7 +87,7 @@ class TrainingIntegrationTest {
     @Test
     fun `batch full size XOR with logistic activation`() {
         println("Training XOR batch size 100 logistic activation...")
-        val training = Training(logisticNetwork, trainingSet, validationSet, epochs, callback, eta)
+        val training = Training(logisticNetwork, trainingSet, validationSet, epochs, callback, SGD(eta))
         training.perform()
 
         val loss = training.validationLoss()
@@ -97,7 +97,7 @@ class TrainingIntegrationTest {
     @Test
     fun `batch size 10 XOR with leaky ReLU activation`() {
         println("Training XOR batch size 10 leaky ReLU activation...")
-        val training = Training(leakyReluNetwork, trainingSet, validationSet, epochs, callback, eta, 10)
+        val training = Training(leakyReluNetwork, trainingSet, validationSet, epochs, callback, SGD(eta), 10)
         training.perform()
 
         val loss = training.validationLoss()
@@ -107,7 +107,7 @@ class TrainingIntegrationTest {
     @Test
     fun `batch size 100 XOR with leaky ReLU activation`() {
         println("Training XOR batch size 100 leaky ReLU activation...")
-        val training = Training(leakyReluNetwork, trainingSet, validationSet, epochs, callback, eta, 100)
+        val training = Training(leakyReluNetwork, trainingSet, validationSet, epochs, callback, SGD(eta), 100)
         training.perform()
 
         val loss = training.validationLoss()
@@ -117,7 +117,7 @@ class TrainingIntegrationTest {
     @Test
     fun `batch full size XOR with leaky ReLU activation`() {
         println("Training XOR batch full size leaky ReLU activation...")
-        val training = Training(leakyReluNetwork, trainingSet, validationSet, epochs, callback, eta * 0.1)
+        val training = Training(leakyReluNetwork, trainingSet, validationSet, epochs, callback, SGD(eta * 0.1))
         training.perform()
 
         val loss = training.validationLoss()
