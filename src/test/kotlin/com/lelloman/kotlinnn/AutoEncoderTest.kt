@@ -4,7 +4,6 @@ import com.lelloman.kotlinnn.layer.DenseLayer
 import com.lelloman.kotlinnn.layer.GaussianWeightsInitializer
 import com.lelloman.kotlinnn.layer.InputLayer
 import com.lelloman.kotlinnn.layer.TanhActivation
-import com.lelloman.kotlinnn.training.BatchTraining
 import com.lelloman.kotlinnn.training.Training
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
@@ -67,7 +66,7 @@ class AutoEncoderTest {
         }
         val eta = 0.001
         val batchSize = 10
-        val training = BatchTraining(network, trainingSet, validationSet,epochs, callback, eta, batchSize)
+        val training = Training(network, trainingSet, validationSet,epochs, callback, eta, batchSize)
         training.perform()
 
         ks.forEach { k ->
