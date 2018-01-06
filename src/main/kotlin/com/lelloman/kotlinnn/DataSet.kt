@@ -3,7 +3,7 @@ package com.lelloman.kotlinnn
 import java.util.*
 
 class DataSet(@Suppress("MemberVisibilityCanPrivate") val input: Array<DoubleArray>,
-              val output: Array<DoubleArray>,
+              @Suppress("MemberVisibilityCanPrivate") val output: Array<DoubleArray>,
               private val random: Random) {
 
     val inputDimension: Int
@@ -38,7 +38,7 @@ class DataSet(@Suppress("MemberVisibilityCanPrivate") val input: Array<DoubleArr
     }
 
     fun shuffle() {
-        val indices = MutableList(size, {it})
+        val indices = MutableList(size, { it })
         (0 until size).forEach {
             randomizer[it] = indices.removeAt(random.nextInt(indices.size))
         }
@@ -60,16 +60,12 @@ class DataSet(@Suppress("MemberVisibilityCanPrivate") val input: Array<DoubleArr
         private val output = mutableListOf<DoubleArray>()
         private var random = Random()
 
-        fun add(action: (index: Int) -> Pair<DoubleArray, DoubleArray>) = apply{
+        fun add(action: (index: Int) -> Pair<DoubleArray, DoubleArray>) = apply {
             (0 until size).forEach {
                 val sample = action(it)
                 input.add(sample.first)
                 output.add(sample.second)
             }
-        }
-
-        fun random(random: Random) = apply {
-            this.random = random
         }
 
         fun build() = DataSet(input.toTypedArray(), output.toTypedArray(), random)

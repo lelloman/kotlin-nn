@@ -44,7 +44,7 @@ class AutoEncoderTest {
             val wave = DoubleArray(waveSampleSize, { Math.sin(it * k) })
             wave to wave
         }
-        ks.forEach {  k ->
+        ks.forEach { k ->
             val s = DoubleArray(waveSampleSize, { Math.sin(it * k) })
             println("k $k ${s.joinToString("")}")
         }
@@ -72,8 +72,8 @@ class AutoEncoderTest {
         ks.forEach { k ->
             val wave = DoubleArray(waveSampleSize, { Math.sin(it * k) })
             val reconstructed = network.forwardPass(wave)
-            val a = Array(wave.size, {"%+.2f".format(wave[it])})
-            val b = Array(wave.size, {"%+.2f".format(reconstructed[it])})
+            val a = Array(wave.size, { "%+.2f".format(wave[it]) })
+            val b = Array(wave.size, { "%+.2f".format(reconstructed[it]) })
             println("original: ${a.joinToString(",")}")
             println("network:  ${b.joinToString(",")}")
             println("")
