@@ -2,13 +2,14 @@ package com.lelloman.kotlinnn
 
 import java.util.*
 
-class DataSet(val input: Array<DoubleArray>, val output: Array<DoubleArray>) {
+class DataSet(val input: Array<DoubleArray>,
+              val output: Array<DoubleArray>,
+              private val random: Random) {
 
     val inputDimension: Int
     val outputDimension: Int
     val size = input.size
-    val random = Random()
-    val randomizer = IntArray(size, { it })
+    val randomiser = IntArray(size, { it })
 
     init {
         if (input.size != output.size) {
@@ -37,7 +38,7 @@ class DataSet(val input: Array<DoubleArray>, val output: Array<DoubleArray>) {
     fun shuffle() {
         val indices = MutableList(size, {it})
         (0 until size).forEach {
-            randomizer[it] = indices.removeAt(random.nextInt(indices.size))
+            randomiser[it] = indices.removeAt(random.nextInt(indices.size))
         }
     }
 
@@ -45,7 +46,7 @@ class DataSet(val input: Array<DoubleArray>, val output: Array<DoubleArray>) {
             = other.inputDimension == this.inputDimension && other.outputDimension == this.outputDimension
 
     inline fun forEach(action: (inSample: DoubleArray, outSample: DoubleArray) -> Unit) = (0 until size).forEach {
-        val index = randomizer[it]
+        val index = randomiser[it]
         action(input[index], output[index])
     }
 
@@ -55,16 +56,20 @@ class DataSet(val input: Array<DoubleArray>, val output: Array<DoubleArray>) {
     class Builder(private val size: Int) {
         private val input = mutableListOf<DoubleArray>()
         private val output = mutableListOf<DoubleArray>()
+        private var random = Random()
 
-        fun add(action: (index: Int) -> Pair<DoubleArray, DoubleArray>): Builder {
+        fun add(action: (index: Int) -> Pair<DoubleArray, DoubleArray>) = apply{
             (0 until size).forEach {
                 val sample = action(it)
                 input.add(sample.first)
                 output.add(sample.second)
             }
-            return this
         }
 
-        fun build() = DataSet(input.toTypedArray(), output.toTypedArray())
+        fun random(random: Random) = apply {
+            this.random = random
+        }
+
+        fun build() = DataSet(input.toTypedArray(), output.toTypedArray(), random)
     }
 }

@@ -5,7 +5,6 @@ import com.lelloman.kotlinnn.layer.Layer
 import com.lelloman.kotlinnn.layer.LogisticActivation
 import com.lelloman.kotlinnn.training.BatchTraining
 import com.lelloman.kotlinnn.training.OnlineTraining
-import com.lelloman.kotlinnn.training.OnlineTraining2
 import com.lelloman.kotlinnn.training.Training
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Ignore
@@ -89,8 +88,17 @@ class OnlineTrainingIntegrationTest {
             val y = f(x[0], x[1])
             x to doubleArrayOf(if (y) 1.0 else 0.0)
         }
-        val trainingSet = DataSet.Builder(1000)
-                .add(sample)
+
+        val trainingSetSize = 1000
+        val input = Array(trainingSetSize, { sample(it) })
+        val trainingSet1 = DataSet.Builder(trainingSetSize)
+                .add(input::get)
+                .random(random1)
+                .build()
+
+        val trainingSet2 = DataSet.Builder(trainingSetSize)
+                .add(input::get)
+                .random(random2)
                 .build()
 
         val validationSet = DataSet.Builder(1000)
@@ -110,8 +118,8 @@ class OnlineTrainingIntegrationTest {
             }
         }
 
-        val training1 = OnlineTraining(network1, trainingSet, validationSet, epochs, callBack1, eta)
-        val training2 = BatchTraining(network2, trainingSet, validationSet, epochs, callBack2, eta, batchSize = 1)
+        val training1 = OnlineTraining(network1, trainingSet1, validationSet, epochs, callBack1, eta)
+        val training2 = BatchTraining(network2, trainingSet2, validationSet, epochs, callBack2, eta, batchSize = 1)
 
         training1.perform()
         training2.perform()

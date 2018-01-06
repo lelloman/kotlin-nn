@@ -34,6 +34,7 @@ open class BatchTraining(network: Network,
     private fun trainEpoch(): Double {
 
         var loss = 0.0
+        trainingSet.shuffle()
 
         weightGradients.forEach { Arrays.fill(it, 0.0) }
 
@@ -104,8 +105,10 @@ open class BatchTraining(network: Network,
             }
         }
 
-        (0 until network.size).forEach {
-            network.layerAt(it).deltaWeights(weightGradients[it])
+        if(sampleIndex > 0) {
+            (0 until network.size).forEach {
+                network.layerAt(it).deltaWeights(weightGradients[it])
+            }
         }
 
         return loss

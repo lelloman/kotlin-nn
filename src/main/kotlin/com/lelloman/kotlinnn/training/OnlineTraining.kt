@@ -2,6 +2,7 @@ package com.lelloman.kotlinnn.training
 
 import com.lelloman.kotlinnn.DataSet
 import com.lelloman.kotlinnn.Network
+import java.util.*
 
 class OnlineTraining(network: Network,
                      trainingSet: DataSet,
@@ -19,12 +20,12 @@ class OnlineTraining(network: Network,
         val trainingLoss = trainEpoch()
         var end = epoch == epochs
 
-        if(callback.shouldEndTraining(trainingLoss, validationLoss)) {
+        if (callback.shouldEndTraining(trainingLoss, validationLoss)) {
             end = true
         }
         callback.onEpoch(epoch, trainingLoss, validationLoss, end)
 
-        if(end) {
+        if (end) {
             return
         }
     }
@@ -49,14 +50,12 @@ class OnlineTraining(network: Network,
                 val deltaError = (targetOutput[i] - outputActivation[i]) * outputLayer.activationDerivative(i)
                 outputLayerError[i] = deltaError
                 for (j in 0 until outputLayer.prevLayer.size) {
-                    outputLayerGradients[outputWeightOffset++] = eta * deltaError * prevActivation[j]
+                    outputLayerGradients[outputWeightOffset++] += eta * deltaError * prevActivation[j]
                 }
                 if (outputLayer.hasBias) {
-                    outputLayerGradients[outputWeightOffset++] = eta * deltaError
+                    outputLayerGradients[outputWeightOffset++] += eta * deltaError
                 }
             }
-
-            outputLayer.deltaWeights(outputLayerGradients)
 
             for (layerIndex in network.size - 2 downTo 0) {
                 val layer = network.layerAt(layerIndex)
@@ -66,7 +65,7 @@ class OnlineTraining(network: Network,
 
                 val activation = layer.output
                 val nextLayer = network.layerAt(layerIndex + 1)
-                val nextLayerError = neuronErrors[layerIndex+1]
+                val nextLayerError = neuronErrors[layerIndex + 1]
                 val nextWeightStep = activation.size + (if (nextLayer.hasBias) 1 else 0)
                 val layerError = neuronErrors[layerIndex]
                 val layerGradients = weightGradients[layerIndex]
@@ -84,13 +83,18 @@ class OnlineTraining(network: Network,
                     layerError[i] = deltaError
 
                     for (j in 0 until layer.prevLayer.size) {
-                        layerGradients[weightOffset++] = eta * deltaError * prevActivation[j]
+                        layerGradients[weightOffset++] += eta * deltaError * prevActivation[j]
                     }
                     if (layer.hasBias) {
-                        layerGradients[weightOffset++] = eta * deltaError
+                        layerGradients[weightOffset++] += eta * deltaError
                     }
                 }
-                layer.deltaWeights(layerGradients)
+
+            }
+
+            (0 until network.size).forEach {
+                network.layerAt(it).deltaWeights(weightGradients[it])
+                Arrays.fill(weightGradients[it], 0.0)
             }
         }
 
