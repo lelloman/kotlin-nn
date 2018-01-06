@@ -1,8 +1,13 @@
 package com.lelloman.kotlinnn
 
+import com.lelloman.kotlinnn.layer.GaussianWeightsInitializer
 import com.lelloman.kotlinnn.layer.Layer
+import com.lelloman.kotlinnn.layer.LogisticActivation
+import com.lelloman.kotlinnn.training.BatchTraining
 import com.lelloman.kotlinnn.training.OnlineTraining
+import com.lelloman.kotlinnn.training.OnlineTraining2
 import com.lelloman.kotlinnn.training.Training
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.Ignore
 import org.junit.Test
 import java.awt.Color
@@ -20,6 +25,98 @@ class OnlineTrainingIntegrationTest {
         val graphics = createGraphics()
         graphics.paint = Color.BLACK
         graphics.fillRect(0, 0, width, height)
+    }
+
+    @Test
+    fun `online training is equal to batch training with batch size 1`() {
+        val randomSeed = System.currentTimeMillis()
+        val random1 = Random(randomSeed)
+        val random2 = Random(randomSeed)
+        val activationFactory = { size: Int -> LogisticActivation(size) }
+        val weightsInitializer1 = GaussianWeightsInitializer(random = random1)
+        val weightsInitializer2 = GaussianWeightsInitializer(random = random2)
+
+        val inputLayer1 = Layer.Builder()
+                .size(2)
+                .activation(activationFactory)
+                .build()
+        val hiddenLayer1 = Layer.Builder()
+                .size(10)
+                .activation(activationFactory)
+                .prevLayer(inputLayer1)
+                .weightsInitializer(weightsInitializer1)
+                .build()
+        val outputLayer1 = Layer.Builder()
+                .size(1)
+                .activation(activationFactory)
+                .prevLayer(hiddenLayer1)
+                .weightsInitializer(weightsInitializer1)
+                .build()
+        val network1 = Network.Builder()
+                .addLayer(inputLayer1)
+                .addLayer(hiddenLayer1)
+                .addLayer(outputLayer1)
+                .build()
+
+        val inputLayer2 = Layer.Builder()
+                .size(2)
+                .activation(activationFactory)
+                .build()
+        val hiddenLayer2 = Layer.Builder()
+                .size(10)
+                .activation(activationFactory)
+                .prevLayer(inputLayer2)
+                .weightsInitializer(weightsInitializer2)
+                .build()
+        val outputLayer2 = Layer.Builder()
+                .size(1)
+                .activation(activationFactory)
+                .prevLayer(hiddenLayer2)
+                .weightsInitializer(weightsInitializer2)
+                .build()
+        val network2 = Network.Builder()
+                .addLayer(inputLayer2)
+                .addLayer(hiddenLayer2)
+                .addLayer(outputLayer2)
+                .build()
+
+        val epochs = 10
+        val eta = 0.001
+
+        val f = { a: Double, b: Double -> a.toBoolean().xor(b.toBoolean()) }
+        val sample = { _: Int ->
+            val x = doubleArrayOf(random.nextBoolean().toDouble(), random.nextBoolean().toDouble())
+            val y = f(x[0], x[1])
+            x to doubleArrayOf(if (y) 1.0 else 0.0)
+        }
+        val trainingSet = DataSet.Builder(1000)
+                .add(sample)
+                .build()
+
+        val validationSet = DataSet.Builder(1000)
+                .add(sample)
+                .build()
+
+        val losses1 = mutableListOf<Double>()
+        val losses2 = mutableListOf<Double>()
+        val callBack1 = object : Training.EpochCallback {
+            override fun onEpoch(epoch: Int, trainingLoss: Double, validationLoss: Double, finished: Boolean) {
+                losses1.add(trainingLoss)
+            }
+        }
+        val callBack2 = object : Training.EpochCallback {
+            override fun onEpoch(epoch: Int, trainingLoss: Double, validationLoss: Double, finished: Boolean) {
+                losses2.add(trainingLoss)
+            }
+        }
+
+        val training1 = OnlineTraining(network1, trainingSet, validationSet, epochs, callBack1, eta)
+        val training2 = BatchTraining(network2, trainingSet, validationSet, epochs, callBack2, eta, batchSize = 1)
+
+        training1.perform()
+        training2.perform()
+
+        assertThat(losses1).hasSameElementsAs(losses2)
     }
 
     @Ignore

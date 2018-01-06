@@ -1,10 +1,14 @@
 package com.lelloman.kotlinnn
 
+import java.util.*
+
 class DataSet(val input: Array<DoubleArray>, val output: Array<DoubleArray>) {
 
     val inputDimension: Int
     val outputDimension: Int
     val size = input.size
+    val random = Random()
+    val randomizer = IntArray(size, { it })
 
     init {
         if (input.size != output.size) {
@@ -30,12 +34,19 @@ class DataSet(val input: Array<DoubleArray>, val output: Array<DoubleArray>) {
         }
     }
 
+    fun shuffle() {
+        val indices = MutableList(size, {it})
+        (0 until size).forEach {
+            randomizer[it] = indices.removeAt(random.nextInt(indices.size))
+        }
+    }
 
     fun sameDimensionAs(other: DataSet)
             = other.inputDimension == this.inputDimension && other.outputDimension == this.outputDimension
 
     inline fun forEach(action: (inSample: DoubleArray, outSample: DoubleArray) -> Unit) = (0 until size).forEach {
-        action(input[it], output[it])
+        val index = randomizer[it]
+        action(input[index], output[index])
     }
 
     inline fun <reified T> map(action: (inSample: DoubleArray, outSample: DoubleArray) -> T)

@@ -32,6 +32,7 @@ class OnlineTraining(network: Network,
     private fun trainEpoch(): Double {
 
         var loss = 0.0
+        trainingSet.shuffle()
 
         trainingSet.forEach { input, targetOutput ->
             val outputActivation = network.forwardPass(input)

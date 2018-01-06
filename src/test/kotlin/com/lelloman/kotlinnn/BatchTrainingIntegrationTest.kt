@@ -19,7 +19,7 @@ class BatchTrainingIntegrationTest {
     private val lossThreshold = 0.001
 
     private val trainingSet by lazy {
-        DataSet.Builder(1000)
+        DataSet.Builder(10000)
                 .add(::sample)
                 .build()
     }
@@ -41,7 +41,7 @@ class BatchTrainingIntegrationTest {
 
     }
 
-    fun f(a: Double, b: Double) = (a.toBoolean()).xor(b.toBoolean())
+    fun f(a: Double, b: Double) = (a.toBoolean()).or(b.toBoolean())
 
     private fun sample(index: Int): Pair<DoubleArray, DoubleArray>{
         val x = doubleArrayOf(random.nextBoolean().toDouble(), random.nextBoolean().toDouble())
@@ -50,7 +50,7 @@ class BatchTrainingIntegrationTest {
     }
 
     private fun makeNetwork(activationFactory: (Int) -> LayerActivation,
-                            weightsInitializer: WeightsInitializer = GaussianWeightsInitializer(0.0, 0.3))
+                            weightsInitializer: WeightsInitializer = GaussianWeightsInitializer(0.5, 0.3))
             : Network {
         val inputLayer = Layer.Builder()
                 .size(2)
@@ -75,10 +75,13 @@ class BatchTrainingIntegrationTest {
                 .build()
     }
 
+    private val epochs = 10000
+    private val eta = 0.001
+
     @Test
     fun `batch size 10 XOR with logistic activation`() {
         println("Training XOR batch size 10 logistic activation...")
-        val training = BatchTraining(logisticNetwork, trainingSet, validationSet, 1000, callback, 0.02, 10)
+        val training = BatchTraining(logisticNetwork, trainingSet, validationSet, epochs, callback, eta, 10)
         training.perform()
 
         val loss = training.validationLoss()
@@ -88,7 +91,7 @@ class BatchTrainingIntegrationTest {
     @Test
     fun `batch size 100 XOR with logistic activation`() {
         println("Training XOR batch size 100 logistic activation...")
-        val training = BatchTraining(logisticNetwork, trainingSet, validationSet, 1000, callback, 0.02, 100)
+        val training = BatchTraining(logisticNetwork, trainingSet, validationSet, epochs, callback, eta, 100)
         training.perform()
 
         val loss = training.validationLoss()
@@ -97,8 +100,8 @@ class BatchTrainingIntegrationTest {
 
     @Test
     fun `batch full size XOR with logistic activation`() {
-        println("Training XOR batch full size logistic activation...")
-        val training = BatchTraining(logisticNetwork, trainingSet, validationSet, 1000, callback, 0.02)
+        println("Training XOR batch size 100 logistic activation...")
+        val training = BatchTraining(logisticNetwork, trainingSet, validationSet, epochs, callback, eta)
         training.perform()
 
         val loss = training.validationLoss()
@@ -108,7 +111,7 @@ class BatchTrainingIntegrationTest {
     @Test
     fun `batch size 10 XOR with leaky ReLU activation`() {
         println("Training XOR batch size 10 leaky ReLU activation...")
-        val training = BatchTraining(leakyReluNetwork, trainingSet, validationSet, 1000, callback, 0.02, 10)
+        val training = BatchTraining(leakyReluNetwork, trainingSet, validationSet, epochs, callback, eta, 10)
         training.perform()
 
         val loss = training.validationLoss()
@@ -118,18 +121,17 @@ class BatchTrainingIntegrationTest {
     @Test
     fun `batch size 100 XOR with leaky ReLU activation`() {
         println("Training XOR batch size 100 leaky ReLU activation...")
-        val training = BatchTraining(leakyReluNetwork, trainingSet, validationSet, 1000, callback, 0.02, 100)
+        val training = BatchTraining(leakyReluNetwork, trainingSet, validationSet, epochs, callback, eta, 100)
         training.perform()
 
         val loss = training.validationLoss()
         Assertions.assertThat(loss).isLessThan(lossThreshold)
     }
 
-    @Ignore // doesn't seem to work with leaky ReLU
     @Test
     fun `batch full size XOR with leaky ReLU activation`() {
         println("Training XOR batch full size leaky ReLU activation...")
-        val training = BatchTraining(leakyReluNetwork, trainingSet, validationSet, 1000, callback, 0.02)
+        val training = BatchTraining(leakyReluNetwork, trainingSet, validationSet, epochs, callback, eta *0.1)
         training.perform()
 
         val loss = training.validationLoss()

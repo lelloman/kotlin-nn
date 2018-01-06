@@ -4,7 +4,7 @@ import com.lelloman.kotlinnn.DataSet
 import com.lelloman.kotlinnn.Network
 import java.util.*
 
-class BatchTraining(network: Network,
+open class BatchTraining(network: Network,
                     trainingSet: DataSet,
                     validationSet: DataSet,
                     epochs: Int,
@@ -84,7 +84,7 @@ class BatchTraining(network: Network,
                         nextWeightIndex += nextWeightStep
                     }
                     deltaError *= layer.activationDerivative(i)
-                    layerError[i] = deltaError
+                    layerError[i] += deltaError
 
                     for (j in 0 until layer.prevLayer.size) {
                         layerGradients[weightOffset++] += eta * deltaError * prevActivation[j]
@@ -95,11 +95,12 @@ class BatchTraining(network: Network,
                 }
             }
 
-            if(sampleIndex++ >= batchSize){
+            if(++sampleIndex >= batchSize){
                 (0 until network.size).forEach {
                     network.layerAt(it).deltaWeights(weightGradients[it])
                     Arrays.fill(weightGradients[it], 0.0)
                 }
+                sampleIndex = 0
             }
         }
 
