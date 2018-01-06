@@ -14,6 +14,12 @@ abstract class Training(protected val network: Network,
         fun shouldEndTraining(trainingLoss: Double, validationLoss: Double) = false
     }
 
+    open class PrintEpochCallback : EpochCallback{
+        override fun onEpoch(epoch: Int, trainingLoss: Double, validationLoss: Double, finished: Boolean) {
+            println("epoch $epoch training loss $trainingLoss validation loss $validationLoss")
+        }
+    }
+
     init {
         if (trainingSet.sameDimensionAs(validationSet).not()) {
             throw IllegalArgumentException("Training set and validation set must have same dimensions, training " +
