@@ -4,13 +4,11 @@ import com.lelloman.kotlinnn.DataSet
 import com.lelloman.kotlinnn.Network
 import com.lelloman.kotlinnn.layer.*
 import com.lelloman.kotlinnn.toDouble
-import com.lelloman.kotlinnn.training.BatchTraining
 import com.lelloman.kotlinnn.training.OnlineTraining
 import com.lelloman.kotlinnn.training.Training
 import org.assertj.core.api.Assertions
 import org.junit.Test
 import java.util.*
-import kotlin.math.roundToInt
 
 abstract class LogicGateTrainingTest {
 
@@ -21,7 +19,7 @@ abstract class LogicGateTrainingTest {
 
     private val lossThreshold = 0.001
 
-    private fun sample(index: Int): Pair<DoubleArray, DoubleArray>{
+    private fun sample(index: Int): Pair<DoubleArray, DoubleArray> {
         val x = doubleArrayOf(random.nextBoolean().toDouble(), random.nextBoolean().toDouble())
         val y = f(x[0], x[1])
         return x to doubleArrayOf(if (y) 1.0 else 0.0)

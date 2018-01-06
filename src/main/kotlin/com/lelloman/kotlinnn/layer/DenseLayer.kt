@@ -10,7 +10,6 @@ open class DenseLayer internal constructor(size: Int,
     private val z = DoubleArray(size)
 
     override val weightsSize: Int by lazy { weights.size }
-    private val neuronConnections: Int = size + (if (hasBias) 1 else 0)
     private val weights: DoubleArray = DoubleArray(size * prevLayer!!.size + (if (hasBias) size else 0), { 0.0 })
 
     override fun setWeights(weights: DoubleArray) {

@@ -4,7 +4,6 @@ import com.lelloman.kotlinnn.layer.*
 import com.lelloman.kotlinnn.training.BatchTraining
 import com.lelloman.kotlinnn.training.Training
 import org.assertj.core.api.Assertions
-import org.junit.Ignore
 import org.junit.Test
 import java.util.*
 import kotlin.math.roundToInt
@@ -12,9 +11,6 @@ import kotlin.math.roundToInt
 class BatchTrainingIntegrationTest {
 
     private val random = Random()
-
-    protected fun Double.toBoolean() = roundToInt() == 1
-    private fun Boolean.toDouble() = if (this) 1.0 else 0.0
 
     private val lossThreshold = 0.001
 
@@ -41,7 +37,7 @@ class BatchTrainingIntegrationTest {
 
     }
 
-    fun f(a: Double, b: Double) = (a.toBoolean()).or(b.toBoolean())
+    private fun f(a: Double, b: Double) = (a.toBoolean()).or(b.toBoolean())
 
     private fun sample(index: Int): Pair<DoubleArray, DoubleArray>{
         val x = doubleArrayOf(random.nextBoolean().toDouble(), random.nextBoolean().toDouble())

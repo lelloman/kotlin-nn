@@ -5,7 +5,7 @@ import com.lelloman.kotlinnn.Network
 
 abstract class Training(protected val network: Network,
                         protected val trainingSet: DataSet,
-                        protected val validationSet: DataSet,
+                        private val validationSet: DataSet,
                         protected val epochs: Int,
                         protected val callback: EpochCallback) {
 

@@ -37,7 +37,7 @@ class Network private constructor(private val layers: Array<Layer>) {
                 throw IllegalStateException("A network must have at least an input and an output layer")
             }
 
-            if (!(layers[0] is InputLayer)) {
+            if (layers[0] !is InputLayer) {
                 throw IllegalStateException("The first layer of the network must be input")
             }
 

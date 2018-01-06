@@ -2,22 +2,24 @@ package com.lelloman.kotlinnn
 
 import java.util.*
 
-class DataSet(val input: Array<DoubleArray>,
+class DataSet(@Suppress("MemberVisibilityCanPrivate") val input: Array<DoubleArray>,
               val output: Array<DoubleArray>,
               private val random: Random) {
 
     val inputDimension: Int
     val outputDimension: Int
     val size = input.size
-    val randomiser = IntArray(size, { it })
+
+    @Suppress("MemberVisibilityCanPrivate")
+    val randomizer = IntArray(size, { it })
 
     init {
         if (input.size != output.size) {
-            throw IllegalArgumentException("Dataset input and output must have equal size, input has ${input.size} samples while ouptut has ${output.size}")
+            throw IllegalArgumentException("DataSet input and output must have equal size, input has ${input.size} samples while output has ${output.size}")
         }
 
         if (input.isEmpty()) {
-            throw IllegalArgumentException("Dataset must have data in it, input and output are empty")
+            throw IllegalArgumentException("DataSet must have data in it, input and output are empty")
         }
 
         inputDimension = input[0].size
@@ -38,7 +40,7 @@ class DataSet(val input: Array<DoubleArray>,
     fun shuffle() {
         val indices = MutableList(size, {it})
         (0 until size).forEach {
-            randomiser[it] = indices.removeAt(random.nextInt(indices.size))
+            randomizer[it] = indices.removeAt(random.nextInt(indices.size))
         }
     }
 
@@ -46,7 +48,7 @@ class DataSet(val input: Array<DoubleArray>,
             = other.inputDimension == this.inputDimension && other.outputDimension == this.outputDimension
 
     inline fun forEach(action: (inSample: DoubleArray, outSample: DoubleArray) -> Unit) = (0 until size).forEach {
-        val index = randomiser[it]
+        val index = randomizer[it]
         action(input[index], output[index])
     }
 
