@@ -1,5 +1,7 @@
 package com.lelloman.kotlinnn
 
+import com.lelloman.kotlinnn.layer.DenseLayer
+import com.lelloman.kotlinnn.layer.InputLayer
 import com.lelloman.kotlinnn.layer.Layer
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
@@ -14,10 +16,8 @@ class NetworkIntegrationTest {
         I O
      */
     private val network1: Network by lazy {
-        val inputLayer = Layer.Builder()
-                .size(1)
-                .build()
-        val outputLayer = Layer.Builder()
+        val inputLayer = InputLayer(1)
+        val outputLayer = DenseLayer.Builder()
                 .size(1)
                 .noBias()
                 .prevLayer(inputLayer)
@@ -53,10 +53,8 @@ class NetworkIntegrationTest {
         B
      */
     private val network2: Network by lazy {
-        val inputLayer = Layer.Builder()
-                .size(1)
-                .build()
-        val outputLayer = Layer.Builder()
+        val inputLayer = InputLayer(1)
+        val outputLayer = DenseLayer.Builder()
                 .size(1)
                 .prevLayer(inputLayer)
                 .build()
@@ -93,10 +91,8 @@ class NetworkIntegrationTest {
         B
      */
     private val network3: Network by lazy {
-        val inputLayer = Layer.Builder()
-                .size(2)
-                .build()
-        val outputLayer = Layer.Builder()
+        val inputLayer = InputLayer(2)
+        val outputLayer = DenseLayer.Builder()
                 .size(1)
                 .prevLayer(inputLayer)
                 .build()
@@ -145,10 +141,8 @@ class NetworkIntegrationTest {
         B
      */
     private val network4: Network by lazy {
-        val inputLayer = Layer.Builder()
-                .size(2)
-                .build()
-        val outputLayer = Layer.Builder()
+        val inputLayer = InputLayer(2)
+        val outputLayer = DenseLayer.Builder()
                 .size(2)
                 .prevLayer(inputLayer)
                 .build()
@@ -203,14 +197,12 @@ class NetworkIntegrationTest {
        B
     */
     private val network5: Network by lazy {
-        val inputLayer = Layer.Builder()
-                .size(2)
-                .build()
-        val hiddenLayer = Layer.Builder()
+        val inputLayer = InputLayer(2)
+        val hiddenLayer = DenseLayer.Builder()
                 .size(2)
                 .prevLayer(inputLayer)
                 .build()
-        val outputLayer = Layer.Builder()
+        val outputLayer = DenseLayer.Builder()
                 .size(2)
                 .prevLayer(hiddenLayer)
                 .noBias()

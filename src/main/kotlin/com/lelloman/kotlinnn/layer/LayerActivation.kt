@@ -14,6 +14,11 @@ abstract class LayerActivation(val size: Int) {
     abstract protected fun funcPrime(z: Double): Double
 }
 
+class InputActivation(size: Int) : LayerActivation(size) {
+    override fun func(z: Double) = throw RuntimeException("cannot compute InputActivation")
+    override fun funcPrime(z: Double) = throw RuntimeException("cannot differentiate InputActivation")
+}
+
 class LogisticActivation(size: Int) : LayerActivation(size) {
     override fun func(z: Double) = 1.0 / (1.0 + Math.exp(-z))
     override fun funcPrime(z: Double) = z * (1 - z)

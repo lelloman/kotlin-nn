@@ -57,7 +57,7 @@ class OnlineTraining(network: Network,
                 }
             }
 
-            for (layerIndex in network.size - 2 downTo 0) {
+            for (layerIndex in network.size - 2 downTo 1) {
                 val layer = network.layerAt(layerIndex)
                 if (layer.isTrainable().not()) {
                     continue
@@ -92,7 +92,7 @@ class OnlineTraining(network: Network,
 
             }
 
-            (0 until network.size).forEach {
+            (1 until network.size).forEach {
                 network.layerAt(it).deltaWeights(weightGradients[it])
                 Arrays.fill(weightGradients[it], 0.0)
             }
