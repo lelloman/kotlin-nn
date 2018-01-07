@@ -25,6 +25,10 @@ class Network private constructor(private val layers: Array<Layer>) {
 
     fun layerAt(index: Int) = layers[index]
 
+    fun setTraining(isTraining: Boolean) = layers.forEach {
+        it.isTraining = isTraining
+    }
+
     class Builder {
         private val layers = mutableListOf<Layer>()
 
@@ -42,7 +46,7 @@ class Network private constructor(private val layers: Array<Layer>) {
             }
 
             (1 until layers.size)
-                    .filter { layers[it] is InputLayer}
+                    .filter { layers[it] is InputLayer }
                     .forEach { throw IllegalStateException("Layer $it is an input layer, only the first layer can be input") }
 
             // TODO check for circular network

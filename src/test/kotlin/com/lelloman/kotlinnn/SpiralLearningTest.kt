@@ -17,7 +17,11 @@ class SpiralLearningTest {
     private val trainingSet = spiralDataSet(5000)
     private val validationSet = spiralDataSet(1000)
 
+    private var saveImages = true
+
     private fun saveNetworkSampling(network: Network, dirName: String, fileName: String) {
+        if (saveImages.not()) return
+
         val img = createImage(imgSizeD)
         for (x in 0 until imgSizeI) {
             val xd = x.toDouble() / imgSizeD
@@ -36,6 +40,8 @@ class SpiralLearningTest {
 
     @Test
     fun `learns spiral branch classification with SGD`() {
+        saveImages = false
+
         File(getNoVcsDir(), "spiral").deleteRecursively()
         val folderName = "spiral_sgd"
 
@@ -79,7 +85,7 @@ class SpiralLearningTest {
                 .addLayer(output)
                 .build()
 
-        val epochs = 10000
+        val epochs = 1000
         val callback = object : Training.PrintEpochCallback() {
             override fun onEpoch(epoch: Int, trainingLoss: Double, validationLoss: Double, finished: Boolean) {
                 super.onEpoch(epoch, trainingLoss, validationLoss, finished)

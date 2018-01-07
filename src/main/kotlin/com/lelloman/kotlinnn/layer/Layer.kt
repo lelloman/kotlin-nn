@@ -7,6 +7,8 @@ abstract class Layer(val size: Int,
 
     protected val activation = activationFactory.invoke(size)
 
+    var isTraining = false
+
     val output: DoubleArray
         get() = activation.output
 

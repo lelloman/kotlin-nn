@@ -48,7 +48,11 @@ open class DenseLayer internal constructor(size: Int,
             z[i] = v
         }
 
-        activation.perform(z)
+        if (isTraining) {
+            activation.performWithDerivative(z)
+        } else {
+            activation.perform(z)
+        }
     }
 
     override fun activationDerivative(index: Int) = activation.derivative(index)
@@ -76,10 +80,6 @@ open class DenseLayer internal constructor(size: Int,
 
         fun noBias() = apply {
             hasBias = false
-        }
-
-        fun activation(activationFactory: (Int) -> LayerActivation) = apply {
-            this.activationFactory = activationFactory
         }
 
         fun activation(activation: Activation) = apply {

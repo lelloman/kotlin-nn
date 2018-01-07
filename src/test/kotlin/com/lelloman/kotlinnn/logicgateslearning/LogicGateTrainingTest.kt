@@ -24,24 +24,24 @@ abstract class LogicGateTrainingTest {
 
     private val epochs = 1000
 
-    private val logisticNetwork = makeNetwork({ size -> LogisticActivation(size) })
-    private val tanhNetwork = makeNetwork({ size -> TanhActivation(size) })
-    private val reluNetwork = makeNetwork({ size -> ReluActivation(size) }, GaussianWeightsInitializer(0.3, 0.2))
-    private val leakyReluNetwork = makeNetwork({ size -> LeakyReluActivation(size) }, GaussianWeightsInitializer(0.3, 0.2))
+    private val logisticNetwork = makeNetwork(Activation.LOGISTIC)
+    private val tanhNetwork = makeNetwork(Activation.TANH)
+    private val reluNetwork = makeNetwork(Activation.RELU, GaussianWeightsInitializer(0.3, 0.2))
+    private val leakyReluNetwork = makeNetwork(Activation.LEAKY_RELU, GaussianWeightsInitializer(0.3, 0.2))
 
-    private fun makeNetwork(activationFactory: (Int) -> LayerActivation,
+    private fun makeNetwork(activation: Activation,
                             weightsInitializer: WeightsInitializer = GaussianWeightsInitializer(0.3, 0.3))
             : Network {
         val inputLayer = InputLayer(2)
         val hiddenLayer = DenseLayer.Builder()
                 .size(8)
-                .activation(activationFactory)
+                .activation(activation)
                 .prevLayer(inputLayer)
                 .weightsInitializer(weightsInitializer)
                 .build()
         val outputLayer = DenseLayer.Builder()
                 .size(1)
-                .activation(activationFactory)
+                .activation(activation)
                 .prevLayer(hiddenLayer)
                 .weightsInitializer(weightsInitializer)
                 .build()

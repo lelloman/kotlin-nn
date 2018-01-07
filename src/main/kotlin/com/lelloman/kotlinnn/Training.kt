@@ -33,6 +33,8 @@ open class Training(private val network: Network,
     }
 
     fun perform() = (1..epochs).forEach { epoch ->
+        network.setTraining(true)
+
         val trainingLoss = trainEpoch()
         val validationLoss = validationLoss()
         var end = epoch == epochs
@@ -43,6 +45,7 @@ open class Training(private val network: Network,
         callback.onEpoch(epoch, trainingLoss, validationLoss, end)
 
         if (end) {
+            network.setTraining(false)
             return
         }
     }

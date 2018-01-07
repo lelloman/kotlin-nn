@@ -15,27 +15,25 @@ class TrainingIntegrationTest {
     private val trainingSet by lazy { xorDataSet(10000) }
     private val validationSet by lazy { xorDataSet(100) }
 
-    private val logisticNetwork = makeNetwork({ size -> LogisticActivation(size) },
-            GaussianWeightsInitializer(0.0, 0.3))
-    private val leakyReluNetwork = makeNetwork({ size -> LeakyReluActivation(size) },
-            GaussianWeightsInitializer(0.0, 0.3))
+    private val logisticNetwork = makeNetwork(Activation.LOGISTIC, GaussianWeightsInitializer(0.0, 0.3))
+    private val leakyReluNetwork = makeNetwork(Activation.LEAKY_RELU, GaussianWeightsInitializer(0.4, 0.3))
 
     private val callback = object : Training.PrintEpochCallback() {
         override fun shouldEndTraining(trainingLoss: Double, validationLoss: Double) = validationLoss < lossThreshold
     }
 
-    private fun makeNetwork(activationFactory: (Int) -> LayerActivation, weightsInitializer: WeightsInitializer)
+    private fun makeNetwork(activation: Activation, weightsInitializer: WeightsInitializer)
             : Network {
         val inputLayer = InputLayer(2)
         val hiddenLayer = DenseLayer.Builder()
                 .size(8)
-                .activation(activationFactory)
+                .activation(activation)
                 .prevLayer(inputLayer)
                 .weightsInitializer(weightsInitializer)
                 .build()
         val outputLayer = DenseLayer.Builder()
                 .size(1)
-                .activation(activationFactory)
+                .activation(activation)
                 .prevLayer(hiddenLayer)
                 .weightsInitializer(weightsInitializer)
                 .build()
@@ -101,7 +99,7 @@ class TrainingIntegrationTest {
     @Test
     fun `batch full size XOR with leaky ReLU activation`() {
         println("Training XOR batch full size leaky ReLU activation...")
-        val training = Training(leakyReluNetwork, trainingSet, validationSet, epochs, callback, SGD(0.0001))
+        val training = Training(leakyReluNetwork, trainingSet, validationSet, epochs, callback, SGD(0.00005))
         training.perform()
 
         val loss = training.validationLoss()

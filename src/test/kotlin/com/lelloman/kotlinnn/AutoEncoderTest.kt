@@ -1,9 +1,9 @@
 package com.lelloman.kotlinnn
 
+import com.lelloman.kotlinnn.layer.Activation
 import com.lelloman.kotlinnn.layer.DenseLayer
 import com.lelloman.kotlinnn.layer.GaussianWeightsInitializer
 import com.lelloman.kotlinnn.layer.InputLayer
-import com.lelloman.kotlinnn.layer.TanhActivation
 import com.lelloman.kotlinnn.optimizer.SGD
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
@@ -22,13 +22,13 @@ class AutoEncoderTest {
         val encodedLayer = DenseLayer.Builder()
                 .prevLayer(input)
                 .size(8)
-                .activation(::TanhActivation)
+                .activation(Activation.TANH)
                 .weightsInitializer(weightsInitializer)
                 .build()
         val output = DenseLayer.Builder()
                 .size(waveSampleSize)
                 .prevLayer(encodedLayer)
-                .activation(::TanhActivation)
+                .activation(Activation.TANH)
                 .weightsInitializer(weightsInitializer)
                 .build()
 
