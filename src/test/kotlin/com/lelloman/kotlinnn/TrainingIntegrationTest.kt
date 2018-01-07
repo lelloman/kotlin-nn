@@ -12,16 +12,8 @@ class TrainingIntegrationTest {
 
     private val lossThreshold = 0.001
 
-    private val trainingSet by lazy {
-        DataSet.Builder(10000)
-                .add(::sample)
-                .build()
-    }
-    private val validationSet by lazy {
-        DataSet.Builder(1000)
-                .add(::sample)
-                .build()
-    }
+    private val trainingSet by lazy { xorDataSet(10000) }
+    private val validationSet by lazy { xorDataSet(100) }
 
     private val logisticNetwork = makeNetwork({ size -> LogisticActivation(size) },
             GaussianWeightsInitializer(0.0, 0.3))
@@ -30,14 +22,6 @@ class TrainingIntegrationTest {
 
     private val callback = object : Training.PrintEpochCallback() {
         override fun shouldEndTraining(trainingLoss: Double, validationLoss: Double) = validationLoss < lossThreshold
-    }
-
-    private fun f(a: Double, b: Double) = (a.toBoolean()).xor(b.toBoolean())
-
-    private fun sample(index: Int): Pair<DoubleArray, DoubleArray> {
-        val x = doubleArrayOf(random.nextBoolean().toDouble(), random.nextBoolean().toDouble())
-        val y = f(x[0], x[1])
-        return x to doubleArrayOf(y.toDouble())
     }
 
     private fun makeNetwork(activationFactory: (Int) -> LayerActivation, weightsInitializer: WeightsInitializer)

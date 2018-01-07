@@ -1,40 +1,22 @@
 package com.lelloman.kotlinnn.logicgateslearning
 
-import com.lelloman.kotlinnn.DataSet
 import com.lelloman.kotlinnn.Network
 import com.lelloman.kotlinnn.Training
 import com.lelloman.kotlinnn.layer.*
+import com.lelloman.kotlinnn.logicGateDataSet
 import com.lelloman.kotlinnn.optimizer.SGD
-import com.lelloman.kotlinnn.toDouble
 import org.assertj.core.api.Assertions
 import org.junit.Test
-import java.util.*
 
 abstract class LogicGateTrainingTest {
 
-    private val random = Random()
-
-    abstract fun f(a: Double, b: Double): Boolean
+    abstract fun f(a: Double, b: Double): Double
     abstract val label: String
 
     private val lossThreshold = 0.001
 
-    private fun sample(index: Int): Pair<DoubleArray, DoubleArray> {
-        val x = doubleArrayOf(random.nextBoolean().toDouble(), random.nextBoolean().toDouble())
-        val y = f(x[0], x[1])
-        return x to doubleArrayOf(if (y) 1.0 else 0.0)
-    }
-
-    private val trainingSet by lazy {
-        DataSet.Builder(10000)
-                .add(::sample)
-                .build()
-    }
-    private val validationSet by lazy {
-        DataSet.Builder(1000)
-                .add(::sample)
-                .build()
-    }
+    private val trainingSet by lazy { logicGateDataSet(10000, ::f) }
+    private val validationSet by lazy { logicGateDataSet(100, ::f) }
 
     private val callback = object : Training.PrintEpochCallback() {
         override fun shouldEndTraining(trainingLoss: Double, validationLoss: Double) = validationLoss < lossThreshold
