@@ -54,6 +54,12 @@ open class DenseLayer internal constructor(size: Int,
     override fun activationDerivative(index: Int) = activation.derivative(index)
 
     class Builder {
+        constructor()
+
+        constructor(size: Int) {
+            this.size = size
+        }
+
         private var size: Int? = null
         private var prevLayer: Layer? = null
         private var hasBias = true
@@ -74,6 +80,10 @@ open class DenseLayer internal constructor(size: Int,
 
         fun activation(activationFactory: (Int) -> LayerActivation) = apply {
             this.activationFactory = activationFactory
+        }
+
+        fun activation(activation: Activation) = apply {
+            this.activationFactory = activation.factory
         }
 
         fun weightsInitializer(weightsInitializer: WeightsInitializer) = apply {

@@ -1,69 +1,105 @@
 package com.lelloman.kotlinnn
 
+import com.lelloman.kotlinnn.layer.Activation
+import com.lelloman.kotlinnn.layer.DenseLayer
+import com.lelloman.kotlinnn.layer.GaussianWeightsInitializer
+import com.lelloman.kotlinnn.layer.InputLayer
+import com.lelloman.kotlinnn.optimizer.SGD
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
-import java.awt.Color
-import java.awt.image.BufferedImage
 import java.io.File
-import java.util.*
-import javax.imageio.ImageIO
 
 class SpiralLearningTest {
 
-    private val random = Random()
-    private val imgSize = 1024.0
+    private val imgSizeI = 512
+    private val imgSizeD = imgSizeI.toDouble()
 
-    private val sample = { index: Int ->
-        val j = index % 3
+    private val trainingSet = spiralDataSet(5000)
+    private val validationSet = spiralDataSet(1000)
 
-        val rIndex = random.nextInt(100)
-        val r = rIndex / 100.0
-        val tStep = (4) / 100.0
+    private fun saveNetworkSampling(network: Network, dirName: String, fileName: String) {
+        val img = createImage(imgSizeD)
+        for (x in 0 until imgSizeI) {
+            val xd = x.toDouble() / imgSizeD
+            for (y in 0 until imgSizeI) {
+                val outSample = network.forwardPass(doubleArrayOf(xd, y / imgSizeD))
 
-        val t = j * 4 + rIndex * tStep + (random.nextGaussian() + 1.0) * 0.25
-        val x = 0.5 + r * Math.sin(t) / 2.0
-        val y = 0.5 + r * Math.cos(t) / 2.0
-
-        doubleArrayOf(x, y) to DoubleArray(3, { (it == j).toDouble() })
-    }
-
-    private val trainingSet = DataSet.Builder(1000)
-            .add(sample)
-            .build()
-
-    private val validationSet = DataSet.Builder(100)
-            .add(sample)
-            .build()
-
-    private fun createImg() = BufferedImage(imgSize.toInt(), imgSize.toInt(), BufferedImage.TYPE_4BYTE_ABGR).apply {
-        val graphics = createGraphics()
-        graphics.paint = Color.BLACK
-        graphics.fillRect(0, 0, width, height)
+                val r = (255 * Math.max(0.0, Math.min(1.0, outSample[0]))).toInt().shl(16)
+                val g = (255 * Math.max(0.0, Math.min(1.0, outSample[1]))).toInt().shl(8)
+                val b = (255 * Math.max(0.0, Math.min(1.0, outSample[2]))).toInt()
+                val p = 0xff000000 + r + g + b
+                img.setRGB(x, y, p.toInt())
+            }
+        }
+        img.save(dirName, fileName)
     }
 
     @Test
-    fun `spiral image`() {
-        val img = createImg()
+    fun `learns spiral branch classification with SGD`() {
+        File(getNoVcsDir(), "spiral").deleteRecursively()
+        val folderName = "spiral_sgd"
 
-        val imgScale = (imgSize.toInt() - 1) * 0.8
-        val imgBase = imgSize * 0.1
+        val dataSetImg = createImage(imgSizeD)
+
         trainingSet.forEach { inSample, outSample ->
-            val x = (imgBase + inSample[0] * imgScale).toInt()
-            val y = (imgBase + inSample[1] * imgScale).toInt()
-            println("coordinates $x $y")
+            val x = (inSample[0] * imgSizeD).toInt()
+            val y = (inSample[1] * imgSizeD).toInt()
 
             val r = (255 * outSample[0]).toInt().shl(16)
             val g = (255 * outSample[1]).toInt().shl(8)
             val b = (255 * outSample[2]).toInt()
             val p = 0xff000000 + r + g + b
-            img.setRGB(x, y, p.toInt())
+            dataSetImg.setRGB(x, y, p.toInt())
         }
 
-        val dir = File("src/test/resources", "spiral")
-        if (dir.exists()) {
-            dir.deleteRecursively()
+        dataSetImg.save(folderName, "dataset")
+
+
+        val input = InputLayer(2)
+        val hidden1 = DenseLayer.Builder(16)
+                .activation(Activation.LOGISTIC)
+                .prevLayer(input)
+                .weightsInitializer(GaussianWeightsInitializer(0.0, 0.2))
+                .build()
+        val hidden2 = DenseLayer.Builder(16)
+                .activation(Activation.LOGISTIC)
+                .prevLayer(hidden1)
+                .weightsInitializer(GaussianWeightsInitializer(0.0, 0.2))
+                .build()
+        val output = DenseLayer.Builder(3)
+                .activation(Activation.LOGISTIC)
+                .prevLayer(hidden2)
+                .weightsInitializer(GaussianWeightsInitializer(0.0, 0.2))
+                .build()
+
+        val network = Network.Builder()
+                .addLayer(input)
+                .addLayer(hidden1)
+                .addLayer(hidden2)
+                .addLayer(output)
+                .build()
+
+        val epochs = 10000
+        val callback = object : Training.PrintEpochCallback() {
+            override fun onEpoch(epoch: Int, trainingLoss: Double, validationLoss: Double, finished: Boolean) {
+                super.onEpoch(epoch, trainingLoss, validationLoss, finished)
+                if (epoch % 50 == 0) {
+                    saveNetworkSampling(network, folderName, "epoch_$epoch")
+                }
+            }
+
+            override fun shouldEndTraining(trainingLoss: Double, validationLoss: Double) = validationLoss < 0.04
         }
-        dir.mkdir()
-        val file = File(dir, "spiral.png")
-        ImageIO.write(img, "png", file)
+
+        val optimizer = SGD(0.01)
+        val batchSize = 10
+
+        val training = Training(network, trainingSet, validationSet, epochs, callback, optimizer, batchSize)
+
+        saveNetworkSampling(network, folderName, "before")
+        training.perform()
+        saveNetworkSampling(network, folderName, "trained")
+
+        assertThat(training.validationLoss()).isLessThan(0.04)
     }
 }
