@@ -55,7 +55,7 @@ abstract class LogicGateTrainingTest {
     @Test
     fun `online learns logic gate with logistic activation multilayer`() {
         println("Training $label logistic activation...")
-        val training = Training(logisticNetwork, trainingSet, validationSet, epochs, callback, SGD(0.01), 10)
+        val training = Training(logisticNetwork, trainingSet, validationSet, callback, epochs, optimizer = SGD(0.01), batchSize = 10)
         training.perform()
 
         val loss = training.validationLoss()
@@ -65,7 +65,7 @@ abstract class LogicGateTrainingTest {
     @Test
     fun `online learns logic gate with tanh activation multilayer`() {
         println("Training $label tanh activation...")
-        val training = Training(tanhNetwork, trainingSet, validationSet, epochs, callback, SGD(0.01), 10)
+        val training = Training(tanhNetwork, trainingSet, validationSet, callback, epochs, optimizer = SGD(0.01), batchSize = 10)
         training.perform()
 
         val loss = training.validationLoss()
@@ -75,7 +75,7 @@ abstract class LogicGateTrainingTest {
     @Test
     fun `online learns logic gate with ReLU activation multilayer`() {
         println("Training $label ReLU activation...")
-        val training = Training(reluNetwork, trainingSet, validationSet, epochs, callback, SGD(0.01), 10)
+        val training = Training(reluNetwork, trainingSet, validationSet, callback, epochs, optimizer = SGD(0.01), batchSize = 10)
         training.perform()
 
         val loss = training.validationLoss()
@@ -85,7 +85,7 @@ abstract class LogicGateTrainingTest {
     @Test
     fun `online learns logic gate with leaky ReLU activation multilayer`() {
         println("Training $label leaky ReLU activation...")
-        val training = Training(leakyReluNetwork, trainingSet, validationSet, epochs, callback, SGD(0.01), 10)
+        val training = Training(leakyReluNetwork, trainingSet, validationSet, callback, epochs, optimizer = SGD(0.01), batchSize = 10)
         training.perform()
 
         val loss = training.validationLoss()

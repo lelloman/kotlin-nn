@@ -1,13 +1,16 @@
 package com.lelloman.kotlinnn
 
+import com.lelloman.kotlinnn.loss.Loss
 import com.lelloman.kotlinnn.optimizer.Optimizer
+import com.lelloman.kotlinnn.optimizer.SGD
 
 open class Training(private val network: Network,
                     private val trainingSet: DataSet,
                     private val validationSet: DataSet,
-                    private val epochs: Int,
                     private val callback: EpochCallback,
-                    private val optimizer: Optimizer,
+                    private val epochs: Int,
+                    loss: Loss = Loss.MSE,
+                    private val optimizer: Optimizer = SGD(),
                     private val batchSize: Int = trainingSet.size) {
 
     interface EpochCallback {
@@ -21,6 +24,7 @@ open class Training(private val network: Network,
         }
     }
 
+    private val loss = loss.factory.invoke()
 
     init {
         if (trainingSet.sameDimensionAs(validationSet).not()) {
@@ -52,7 +56,7 @@ open class Training(private val network: Network,
 
     private fun trainEpoch(): Double {
 
-        var loss = 0.0
+        loss.onEpochStarted(trainingSet.size)
         trainingSet.shuffle()
         optimizer.onStartEpoch()
 
@@ -60,7 +64,7 @@ open class Training(private val network: Network,
 
         trainingSet.forEach { input, targetOutput ->
             val outputActivation = network.forwardPass(input)
-            loss += outputActivation.mapIndexed { index, v -> Math.pow(v - targetOutput[index], 2.0) }.sum() / trainingSet.size
+            loss.onEpochSample(outputActivation, targetOutput)
 
             optimizer.trainOnSample(outputActivation, targetOutput)
             if (++sampleIndex >= batchSize) {
@@ -73,14 +77,8 @@ open class Training(private val network: Network,
             optimizer.updateWeights()
         }
 
-        return loss
+        return loss.getEpochLoss()
     }
 
-    fun validationLoss() = validationSet.map { inSample, outSample ->
-        network.forwardPass(inSample)
-                .mapIndexed { index, y ->
-                    Math.pow(y - outSample[index], 2.0)
-                }
-                .sum()
-    }.average()
+    fun validationLoss() = loss.compute(network, validationSet)
 }

@@ -66,7 +66,7 @@ class AutoEncoderTest {
         }
         val eta = 0.001
         val batchSize = 10
-        val training = Training(network, trainingSet, validationSet, epochs, callback, SGD(eta), batchSize)
+        val training = Training(network, trainingSet, validationSet, callback, epochs, optimizer = SGD(eta), batchSize = batchSize)
         training.perform()
 
         ks.forEach { k ->

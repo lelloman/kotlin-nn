@@ -3,7 +3,7 @@ package com.lelloman.kotlinnn.layer
 abstract class LayerActivation(val size: Int) {
 
     val output = DoubleArray(size)
-    private val derivatives = DoubleArray(size)
+    protected val derivatives = DoubleArray(size)
 
     open fun perform(z: DoubleArray) = (0 until size).forEach {
         output[it] = func(z[it])
@@ -65,11 +65,24 @@ class SoftMaxActivation(size: Int) : LayerActivation(size) {
         }
     }
 
-    override fun func(z: Double) = Math.exp(z)
+    override fun performWithDerivative(z: DoubleArray) {
+        var sum = 0.0
+        (0 until size).forEach {
+            val v = Math.exp(z[it])
+            exp[it] = v
+            sum += v
+        }
 
-    override fun funcPrime(z: Double): Double {
-        return 0.0
+        (0 until size).forEach {
+            val a = exp[it]
+            val v = a / sum
+            output[it] = v
+            derivatives[it] = v * (1 - v) * a
+        }
     }
+
+    override fun func(z: Double) = Math.exp(z)
+    override fun funcPrime(y: Double) = y * (1 - y)
 }
 
 enum class Activation(val factory: (Int) -> LayerActivation) {

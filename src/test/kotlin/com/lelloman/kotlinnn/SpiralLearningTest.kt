@@ -96,7 +96,7 @@ class SpiralLearningTest {
         val optimizer = SGD(0.01)
         val batchSize = 10
 
-        val training = Training(network, trainingSet, validationSet, epochs, callback, optimizer, batchSize)
+        val training = Training(network, trainingSet, validationSet, callback, epochs, optimizer = optimizer, batchSize = batchSize)
 
         saveNetworkSampling(network, folderName, "before")
         training.perform()
