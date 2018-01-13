@@ -1,6 +1,6 @@
 package com.lelloman.kotlinnn
 
-import com.lelloman.kotlinnn.layer.Activation
+import com.lelloman.kotlinnn.activation.Activation
 import com.lelloman.kotlinnn.layer.DenseLayer
 import com.lelloman.kotlinnn.layer.GaussianWeightsInitializer
 import com.lelloman.kotlinnn.layer.InputLayer
@@ -19,14 +19,12 @@ class AutoEncoderTest {
         val weightsInitializer = GaussianWeightsInitializer(0.0, 0.2, random)
 
         val input = InputLayer(waveSampleSize)
-        val encodedLayer = DenseLayer.Builder()
+        val encodedLayer = DenseLayer.Builder(8)
                 .prevLayer(input)
-                .size(8)
                 .activation(Activation.TANH)
                 .weightsInitializer(weightsInitializer)
                 .build()
-        val output = DenseLayer.Builder()
-                .size(waveSampleSize)
+        val output = DenseLayer.Builder(waveSampleSize)
                 .prevLayer(encodedLayer)
                 .activation(Activation.TANH)
                 .weightsInitializer(weightsInitializer)

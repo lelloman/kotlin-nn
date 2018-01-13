@@ -1,6 +1,6 @@
 package com.lelloman.kotlinnn
 
-import com.lelloman.kotlinnn.layer.Activation
+import com.lelloman.kotlinnn.activation.Activation
 import com.lelloman.kotlinnn.layer.DenseLayer
 import com.lelloman.kotlinnn.layer.GaussianWeightsInitializer
 import com.lelloman.kotlinnn.layer.InputLayer
@@ -115,8 +115,8 @@ class SpiralLearningTest {
     }
 
     @Test
-    fun `learns spiral branch classification with SGD XEntropy`() {
-        val folderName = "spiral_sgd_xentropy"
+    fun `learns spiral branch classification with SGD CrossEntropy`() {
+        val folderName = "spiral_sgd_crossentropy"
 
         trainingSet.saveImg(folderName, "dataset")
 
@@ -130,18 +130,18 @@ class SpiralLearningTest {
                 }
             }
 
-            override fun shouldEndTraining(trainingLoss: Double, validationLoss: Double) = validationLoss < 0.01
+            override fun shouldEndTraining(trainingLoss: Double, validationLoss: Double) = validationLoss < 0.05
         }
 
-        val optimizer = SGD(0.005)
+        val optimizer = SGD(0.01)
         val batchSize = 10
 
-        val training = Training(network, trainingSet, validationSet, callback, epochs, loss = Loss.XEntropy, optimizer = optimizer, batchSize = batchSize)
+        val training = Training(network, trainingSet, validationSet, callback, epochs, loss = Loss.CROSS_ENTROPY, optimizer = optimizer, batchSize = batchSize)
 
         saveNetworkSampling(network, folderName, "before")
         training.perform()
         saveNetworkSampling(network, folderName, "trained")
 
-        assertThat(training.validationLoss()).isLessThan(0.04)
+        assertThat(training.validationLoss()).isLessThan(0.05)
     }
 }

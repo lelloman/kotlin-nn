@@ -2,7 +2,11 @@ package com.lelloman.kotlinnn.logicgateslearning
 
 import com.lelloman.kotlinnn.Network
 import com.lelloman.kotlinnn.Training
-import com.lelloman.kotlinnn.layer.*
+import com.lelloman.kotlinnn.activation.Activation
+import com.lelloman.kotlinnn.layer.DenseLayer
+import com.lelloman.kotlinnn.layer.GaussianWeightsInitializer
+import com.lelloman.kotlinnn.layer.InputLayer
+import com.lelloman.kotlinnn.layer.WeightsInitializer
 import com.lelloman.kotlinnn.logicGateDataSet
 import com.lelloman.kotlinnn.optimizer.SGD
 import org.assertj.core.api.Assertions
@@ -33,14 +37,12 @@ abstract class LogicGateTrainingTest {
                             weightsInitializer: WeightsInitializer = GaussianWeightsInitializer(0.3, 0.3))
             : Network {
         val inputLayer = InputLayer(2)
-        val hiddenLayer = DenseLayer.Builder()
-                .size(8)
+        val hiddenLayer = DenseLayer.Builder(8)
                 .activation(activation)
                 .prevLayer(inputLayer)
                 .weightsInitializer(weightsInitializer)
                 .build()
-        val outputLayer = DenseLayer.Builder()
-                .size(1)
+        val outputLayer = DenseLayer.Builder(1)
                 .activation(activation)
                 .prevLayer(hiddenLayer)
                 .weightsInitializer(weightsInitializer)

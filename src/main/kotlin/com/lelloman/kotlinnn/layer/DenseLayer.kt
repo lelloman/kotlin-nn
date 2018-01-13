@@ -1,5 +1,9 @@
 package com.lelloman.kotlinnn.layer
 
+import com.lelloman.kotlinnn.activation.Activation
+import com.lelloman.kotlinnn.activation.LayerActivation
+import com.lelloman.kotlinnn.activation.LogisticActivation
+
 open class DenseLayer internal constructor(size: Int,
                                            prevLayer: Layer?,
                                            hasBias: Boolean,
@@ -69,10 +73,6 @@ open class DenseLayer internal constructor(size: Int,
         private var hasBias = true
         private var activationFactory: (Int) -> LayerActivation = { size -> LogisticActivation(size) }
         private var weightsInitializer: WeightsInitializer = GaussianWeightsInitializer(0.0, 0.3)
-
-        fun size(size: Int) = apply {
-            this.size = size
-        }
 
         fun prevLayer(layer: Layer) = apply {
             prevLayer = layer

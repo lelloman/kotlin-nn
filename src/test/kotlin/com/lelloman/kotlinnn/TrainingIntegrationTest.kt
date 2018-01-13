@@ -1,6 +1,10 @@
 package com.lelloman.kotlinnn
 
-import com.lelloman.kotlinnn.layer.*
+import com.lelloman.kotlinnn.activation.Activation
+import com.lelloman.kotlinnn.layer.DenseLayer
+import com.lelloman.kotlinnn.layer.GaussianWeightsInitializer
+import com.lelloman.kotlinnn.layer.InputLayer
+import com.lelloman.kotlinnn.layer.WeightsInitializer
 import com.lelloman.kotlinnn.optimizer.SGD
 import org.assertj.core.api.Assertions
 import org.junit.Test
@@ -16,7 +20,7 @@ class TrainingIntegrationTest {
     private val validationSet by lazy { xorDataSet(100) }
 
     private val logisticNetwork = makeNetwork(Activation.LOGISTIC, GaussianWeightsInitializer(0.0, 0.3))
-    private val leakyReluNetwork = makeNetwork(Activation.LEAKY_RELU, GaussianWeightsInitializer(0.4, 0.3))
+    private val leakyReluNetwork = makeNetwork(Activation.LEAKY_RELU, GaussianWeightsInitializer(0.4, 0.2))
 
     private val callback = object : Training.PrintEpochCallback() {
         override fun shouldEndTraining(trainingLoss: Double, validationLoss: Double) = validationLoss < lossThreshold
@@ -25,14 +29,12 @@ class TrainingIntegrationTest {
     private fun makeNetwork(activation: Activation, weightsInitializer: WeightsInitializer)
             : Network {
         val inputLayer = InputLayer(2)
-        val hiddenLayer = DenseLayer.Builder()
-                .size(8)
+        val hiddenLayer = DenseLayer.Builder(8)
                 .activation(activation)
                 .prevLayer(inputLayer)
                 .weightsInitializer(weightsInitializer)
                 .build()
-        val outputLayer = DenseLayer.Builder()
-                .size(1)
+        val outputLayer = DenseLayer.Builder(1)
                 .activation(activation)
                 .prevLayer(hiddenLayer)
                 .weightsInitializer(weightsInitializer)

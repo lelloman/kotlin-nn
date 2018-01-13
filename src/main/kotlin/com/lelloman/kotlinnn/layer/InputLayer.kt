@@ -1,5 +1,7 @@
 package com.lelloman.kotlinnn.layer
 
+import com.lelloman.kotlinnn.activation.InputActivation
+
 class InputLayer(size: Int) : Layer(size, null, false, { size: Int -> InputActivation(size) }) {
 
     override val weightsSize = 0

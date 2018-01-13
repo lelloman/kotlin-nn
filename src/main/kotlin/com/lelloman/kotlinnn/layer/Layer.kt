@@ -1,5 +1,7 @@
 package com.lelloman.kotlinnn.layer
 
+import com.lelloman.kotlinnn.activation.LayerActivation
+
 abstract class Layer(val size: Int,
                      val prevLayer: Layer?,
                      val hasBias: Boolean,

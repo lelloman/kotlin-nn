@@ -17,5 +17,5 @@ interface LossFunction {
 
 enum class Loss(val factory: () -> LossFunction) {
     MSE(::MseLoss),
-    XEntropy(::XEntropyLoss)
+    CROSS_ENTROPY(::CrossEntropyLoss)
 }

@@ -3,7 +3,7 @@ package com.lelloman.kotlinnn.loss
 import com.lelloman.kotlinnn.DataSet
 import com.lelloman.kotlinnn.Network
 
-internal class XEntropyLoss : LossFunction {
+internal class CrossEntropyLoss : LossFunction {
 
     private var loss = 0.0
     private var dataSetSize = 0
@@ -19,12 +19,9 @@ internal class XEntropyLoss : LossFunction {
         loss += activation.mapIndexed { index, y ->
             val t = target[index]
             val oneMinusY = 1 - y
-            val logOneMinusY = Math.log(oneMinusY)
+
             gradients[index] = -(y - t) / (y * oneMinusY)
-
-
-            val e = -t * Math.log(y) - (1 - t) * logOneMinusY
-            e
+            -t * Math.log(y) - (1 - t) * Math.log(oneMinusY)
         }.sum() / dataSetSize
         return gradients
     }
