@@ -29,7 +29,7 @@ class SoftmaxActivation(size: Int) : LayerActivation(size) {
             val a = exp[it]
             val v = a / sum
             output[it] = v
-            derivatives[it] = v * (1 - v) * a
+            derivatives[it] = v * (1 - v)
         }
     }
 
