@@ -38,7 +38,7 @@ fun Double.toBoolean() = roundToInt() == 1
 
 fun Boolean.toDouble() = if (this) 1.0 else 0.0
 
-private val random = Random()
+private var random = Random()
 
 fun xorSample(a: Double, b: Double) = a.toBoolean().xor(b.toBoolean()).toDouble()
 fun orSample(a: Double, b: Double) = a.toBoolean().or(b.toBoolean()).toDouble()
@@ -57,21 +57,29 @@ fun xorDataSet(size: Int) = DataSet.Builder(size)
         }
         .build()
 
-// Spiral
-private val spiralSample = { index: Int ->
-    val j = index % 3
+object SpiralDataSet {
 
-    val rIndex = random.nextInt(101)
-    val r = rIndex / 120.0
-    val tStep = (4) / 100.0
+    private var random = Random()
 
-    val t = j * 4 + rIndex * tStep + (random.nextGaussian() + 1.0) * 0.25
-    val x = 0.5 + r * Math.sin(t) / 2.0
-    val y = 0.5 + r * Math.cos(t) / 2.0
+    private val spiralSample = { index: Int ->
+        val j = index % 3
 
-    doubleArrayOf(x, y) to DoubleArray(3, { (it == j).toDouble() })
+        val rIndex = random.nextInt(101)
+        val r = rIndex / 120.0
+        val tStep = (4) / 100.0
+
+        val t = j * 4 + rIndex * tStep + (random.nextGaussian() + 1.0) * 0.25
+        val x = 0.5 + r * Math.sin(t) / 2.0
+        val y = 0.5 + r * Math.cos(t) / 2.0
+
+        doubleArrayOf(x, y) to DoubleArray(3, { (it == j).toDouble() })
+    }
+
+    fun make(size: Int, random: Random = Random()): DataSet {
+        this.random = random
+        return DataSet.Builder(size)
+                .add(spiralSample)
+                .random(random)
+                .build()
+    }
 }
-
-fun spiralDataSet(size: Int) = DataSet.Builder(size)
-        .add(spiralSample)
-        .build()

@@ -7,17 +7,41 @@ import com.lelloman.kotlinnn.layer.InputLayer
 import com.lelloman.kotlinnn.loss.Loss
 import com.lelloman.kotlinnn.optimizer.SGD
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.Before
 import org.junit.Test
+import java.util.*
 
 class SpiralLearningTest {
+
+    inner class SaveImageCallback(private val network: Network, private val folderName: String)
+        : Training.PrintEpochCallback() {
+        override fun onEpoch(epoch: Int, trainingLoss: Double, validationLoss: Double, finished: Boolean) {
+            super.onEpoch(epoch, trainingLoss, validationLoss, finished)
+            if (epoch % 50 == 0) {
+                saveNetworkSampling(network, folderName, "epoch_$epoch")
+            }
+        }
+
+        override fun shouldEndTraining(trainingLoss: Double, validationLoss: Double) = validationLoss < 0.04
+    }
 
     private val imgSizeI = 512
     private val imgSizeD = imgSizeI.toDouble()
 
-    private val trainingSet = spiralDataSet(5000)
-    private val validationSet = spiralDataSet(1000)
+    private lateinit var trainingSet: DataSet
+    private lateinit var validationSet: DataSet
 
     private var saveImages = false
+    private val epochs = 1000
+    private val batchSize = 10
+    private val random
+        get() = Random(12345)
+
+    @Before
+    fun setUp() {
+        trainingSet = SpiralDataSet.make(5000, random)
+        validationSet = SpiralDataSet.make(1000, random)
+    }
 
     private fun saveNetworkSampling(network: Network, dirName: String, fileName: String) {
         if (saveImages.not()) return
@@ -61,17 +85,17 @@ class SpiralLearningTest {
         val hidden1 = DenseLayer.Builder(16)
                 .activation(Activation.LOGISTIC)
                 .prevLayer(input)
-                .weightsInitializer(GaussianWeightsInitializer(0.0, 0.2))
+                .weightsInitializer(GaussianWeightsInitializer(0.0, 0.2, random = random))
                 .build()
         val hidden2 = DenseLayer.Builder(16)
                 .activation(Activation.LOGISTIC)
                 .prevLayer(hidden1)
-                .weightsInitializer(GaussianWeightsInitializer(0.0, 0.2))
+                .weightsInitializer(GaussianWeightsInitializer(0.0, 0.2, random = random))
                 .build()
         val output = DenseLayer.Builder(3)
                 .activation(outputLayerActivation)
                 .prevLayer(hidden2)
-                .weightsInitializer(GaussianWeightsInitializer(0.0, 0.2))
+                .weightsInitializer(GaussianWeightsInitializer(0.0, 0.2, random = random))
                 .build()
 
         return Network.Builder()
@@ -89,20 +113,29 @@ class SpiralLearningTest {
         trainingSet.saveImg(folderName, "dataset")
 
         val network = makeNetwork(Activation.LOGISTIC)
-        val epochs = 1000
-        val callback = object : Training.PrintEpochCallback() {
-            override fun onEpoch(epoch: Int, trainingLoss: Double, validationLoss: Double, finished: Boolean) {
-                super.onEpoch(epoch, trainingLoss, validationLoss, finished)
-                if (epoch % 50 == 0) {
-                    saveNetworkSampling(network, folderName, "epoch_$epoch")
-                }
-            }
-
-            override fun shouldEndTraining(trainingLoss: Double, validationLoss: Double) = validationLoss < 0.04
-        }
+        val callback = SaveImageCallback(network, folderName)
 
         val optimizer = SGD(0.01)
-        val batchSize = 10
+
+        val training = Training(network, trainingSet, validationSet, callback, epochs, optimizer = optimizer, batchSize = batchSize)
+
+        saveNetworkSampling(network, folderName, "before")
+        training.perform()
+        saveNetworkSampling(network, folderName, "trained")
+
+        assertThat(training.validationLoss()).isLessThan(0.04)
+    }
+
+    @Test
+    fun `learns spiral branch classification with logistic SGD MSE and momentum`() {
+        val folderName = "spiral_sgd_mse_momentum"
+
+        trainingSet.saveImg(folderName, "dataset")
+
+        val network = makeNetwork(Activation.LOGISTIC)
+        val callback = SaveImageCallback(network, folderName)
+
+        val optimizer = SGD(0.01, momentum = 0.9)
 
         val training = Training(network, trainingSet, validationSet, callback, epochs, optimizer = optimizer, batchSize = batchSize)
 
@@ -120,20 +153,9 @@ class SpiralLearningTest {
         trainingSet.saveImg(folderName, "dataset")
 
         val network = makeNetwork(Activation.LOGISTIC)
-        val epochs = 1000
-        val callback = object : Training.PrintEpochCallback() {
-            override fun onEpoch(epoch: Int, trainingLoss: Double, validationLoss: Double, finished: Boolean) {
-                super.onEpoch(epoch, trainingLoss, validationLoss, finished)
-                if (epoch % 50 == 0) {
-                    saveNetworkSampling(network, folderName, "epoch_$epoch")
-                }
-            }
-
-            override fun shouldEndTraining(trainingLoss: Double, validationLoss: Double) = validationLoss < 0.05
-        }
+        val callback = SaveImageCallback(network, folderName)
 
         val optimizer = SGD(0.01)
-        val batchSize = 10
 
         val training = Training(network, trainingSet, validationSet, callback, epochs, loss = Loss.CROSS_ENTROPY, optimizer = optimizer, batchSize = batchSize)
 
@@ -151,20 +173,27 @@ class SpiralLearningTest {
         trainingSet.saveImg(folderName, "dataset")
 
         val network = makeNetwork(Activation.SOFTMAX)
-        val epochs = 1000
-        val callback = object : Training.PrintEpochCallback() {
-            override fun onEpoch(epoch: Int, trainingLoss: Double, validationLoss: Double, finished: Boolean) {
-                super.onEpoch(epoch, trainingLoss, validationLoss, finished)
-                if (epoch % 50 == 0) {
-                    saveNetworkSampling(network, folderName, "epoch_$epoch")
-                }
-            }
-
-            override fun shouldEndTraining(trainingLoss: Double, validationLoss: Double) = validationLoss < 0.05
-        }
-
+        val callback = SaveImageCallback(network, folderName)
         val optimizer = SGD(0.01)
-        val batchSize = 10
+
+        val training = Training(network, trainingSet, validationSet, callback, epochs, loss = Loss.CROSS_ENTROPY, optimizer = optimizer, batchSize = batchSize)
+
+        saveNetworkSampling(network, folderName, "before")
+        training.perform()
+        saveNetworkSampling(network, folderName, "trained")
+
+        assertThat(training.validationLoss()).isLessThan(0.05)
+    }
+
+    @Test
+    fun `learns spiral branch classification with softmax SGD CrossEntropy and momentum`() {
+        val folderName = "spiral_softmax_sgd_crossentropy_momentum"
+
+        trainingSet.saveImg(folderName, "dataset")
+
+        val network = makeNetwork(Activation.SOFTMAX)
+        val callback = SaveImageCallback(network, folderName)
+        val optimizer = SGD(0.01, momentum = 0.9)
 
         val training = Training(network, trainingSet, validationSet, callback, epochs, loss = Loss.CROSS_ENTROPY, optimizer = optimizer, batchSize = batchSize)
 

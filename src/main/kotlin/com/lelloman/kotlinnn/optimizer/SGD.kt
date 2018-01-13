@@ -2,10 +2,14 @@ package com.lelloman.kotlinnn.optimizer
 
 import java.util.*
 
-class SGD(eta: Double = 0.01) : Optimizer(eta) {
+class SGD(eta: Double = 0.01, private val momentum: Double? = null) : Optimizer(eta) {
 
     private val weightGradients by lazy {
         Array(network.size, { DoubleArray(network.layerAt(it).weightsSize) })
+    }
+
+    private val prevWeightGradients by lazy {
+        Array(network.size, { DoubleArray(weightGradients[it].size) })
     }
 
     private val neuronErrors by lazy {
@@ -60,7 +64,18 @@ class SGD(eta: Double = 0.01) : Optimizer(eta) {
     }
 
     override fun updateWeights() = (1 until network.size).forEach {
-        network.layerAt(it).deltaWeights(weightGradients[it])
+
+        val gradients = weightGradients[it]
+        momentum?.let { m ->
+            val prevGradients = prevWeightGradients[it]
+            prevGradients.forEachIndexed {gradientIndex, prevGradient ->
+                val currentGradient = gradients[gradientIndex] + prevGradient * m
+                gradients[gradientIndex] = currentGradient
+                prevGradients[gradientIndex] = currentGradient
+            }
+        }
+        network.layerAt(it).deltaWeights(gradients)
+
         Arrays.fill(weightGradients[it], 0.0)
     }
 
