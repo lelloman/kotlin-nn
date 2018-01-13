@@ -7,7 +7,6 @@ import com.lelloman.kotlinnn.layer.InputLayer
 import com.lelloman.kotlinnn.optimizer.SGD
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
-import java.io.File
 
 class SpiralLearningTest {
 
@@ -17,7 +16,7 @@ class SpiralLearningTest {
     private val trainingSet = spiralDataSet(5000)
     private val validationSet = spiralDataSet(1000)
 
-    private var saveImages = true
+    private var saveImages = false
 
     private fun saveNetworkSampling(network: Network, dirName: String, fileName: String) {
         if (saveImages.not()) return
@@ -40,9 +39,6 @@ class SpiralLearningTest {
 
     @Test
     fun `learns spiral branch classification with SGD`() {
-        saveImages = false
-
-        File(getNoVcsDir(), "spiral").deleteRecursively()
         val folderName = "spiral_sgd"
 
         val dataSetImg = createImage(imgSizeD)

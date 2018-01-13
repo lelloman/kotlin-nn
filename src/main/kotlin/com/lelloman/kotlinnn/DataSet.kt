@@ -68,6 +68,10 @@ class DataSet(@Suppress("MemberVisibilityCanPrivate") val input: Array<DoubleArr
             }
         }
 
+        fun random(random: Random) = apply {
+            this.random = random
+        }
+
         fun build() = DataSet(input.toTypedArray(), output.toTypedArray(), random)
     }
 }
