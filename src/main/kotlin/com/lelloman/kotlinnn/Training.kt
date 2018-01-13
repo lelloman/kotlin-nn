@@ -56,7 +56,7 @@ open class Training(private val network: Network,
 
     private fun trainEpoch(): Double {
 
-        loss.onEpochStarted(trainingSet.size)
+        loss.onEpochStarted(network.output.size, trainingSet.size)
         trainingSet.shuffle()
         optimizer.onStartEpoch()
 
@@ -64,9 +64,9 @@ open class Training(private val network: Network,
 
         trainingSet.forEach { input, targetOutput ->
             val outputActivation = network.forwardPass(input)
-            loss.onEpochSample(outputActivation, targetOutput)
+            val error = loss.onEpochSample(outputActivation, targetOutput)
 
-            optimizer.trainOnSample(outputActivation, targetOutput)
+            optimizer.trainOnSample(outputActivation, error)
             if (++sampleIndex >= batchSize) {
                 optimizer.updateWeights()
                 sampleIndex = 0

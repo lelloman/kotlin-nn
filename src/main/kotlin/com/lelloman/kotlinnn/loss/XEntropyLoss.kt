@@ -3,7 +3,7 @@ package com.lelloman.kotlinnn.loss
 import com.lelloman.kotlinnn.DataSet
 import com.lelloman.kotlinnn.Network
 
-internal class MseLoss : LossFunction {
+internal class XEntropyLoss : LossFunction {
 
     private var loss = 0.0
     private var dataSetSize = 0
@@ -16,10 +16,14 @@ internal class MseLoss : LossFunction {
     }
 
     override fun onEpochSample(activation: DoubleArray, target: DoubleArray): DoubleArray {
-        loss += activation.mapIndexed { index, v ->
-            val diff = target[index] - v
-            gradients[index] = diff
-            val e = Math.pow(diff, 2.0)
+        loss += activation.mapIndexed { index, y ->
+            val t = target[index]
+            val oneMinusY = 1 - y
+            val logOneMinusY = Math.log(oneMinusY)
+            gradients[index] = -(y - t) / (y * oneMinusY)
+
+
+            val e = -t * Math.log(y) - (1 - t) * logOneMinusY
             e
         }.sum() / dataSetSize
         return gradients

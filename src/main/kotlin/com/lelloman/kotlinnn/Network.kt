@@ -6,6 +6,7 @@ import com.lelloman.kotlinnn.layer.Layer
 class Network private constructor(private val layers: Array<Layer>) {
 
     val size: Int = layers.size
+    val output by lazy {layers.last().output}
 
     private val forwardLayers: Array<Layer> = layers.sliceArray(IntRange(1, layers.size - 1))
 

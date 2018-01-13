@@ -16,7 +16,7 @@ class SGD(eta: Double = 0.01) : Optimizer(eta) {
         weightGradients.forEach { Arrays.fill(it, 0.0) }
     }
 
-    override fun trainOnSample(outputActivation: DoubleArray, targetOutput: DoubleArray) {
+    override fun trainOnSample(outputActivation: DoubleArray, outputError: DoubleArray) {
 
         for (layerIndex in network.size - 1 downTo 1) {
             val layer = network.layerAt(layerIndex)
@@ -35,7 +35,7 @@ class SGD(eta: Double = 0.01) : Optimizer(eta) {
 
             for (i in 0 until activation.size) {
                 var deltaError = if (isOutputLayer) {
-                    targetOutput[i] - outputActivation[i]
+                    outputError[i]
                 } else {
                     var offset = i
                     (0 until nextLayerError!!.size).sumByDouble {
