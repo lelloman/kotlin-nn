@@ -1,7 +1,6 @@
 package com.lelloman.kotlinnn
 
 import com.lelloman.kotlinnn.loss.Loss
-import com.lelloman.kotlinnn.optimizer.Optimizer
 import com.lelloman.kotlinnn.optimizer.SGD
 
 open class Training(private val network: Network,
@@ -10,7 +9,7 @@ open class Training(private val network: Network,
                     private val callback: EpochCallback,
                     private val epochs: Int,
                     loss: Loss = Loss.MSE,
-                    private val optimizer: Optimizer = SGD(),
+                    private val optimizer: SGD = SGD(),
                     private val batchSize: Int = trainingSet.size) {
 
     interface EpochCallback {
@@ -66,7 +65,7 @@ open class Training(private val network: Network,
             val outputActivation = network.forwardPass(input)
             val error = loss.onEpochSample(outputActivation, targetOutput)
 
-            optimizer.trainOnSample(outputActivation, error)
+            optimizer.trainOnSample(error)
             if (++sampleIndex >= batchSize) {
                 optimizer.updateWeights()
                 sampleIndex = 0

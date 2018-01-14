@@ -1,26 +1,29 @@
 package com.lelloman.kotlinnn.optimizer
 
+import com.lelloman.kotlinnn.Network
 import java.util.*
 
-class SGD(eta: Double = 0.01, private val momentum: Double? = null) : Optimizer(eta) {
+open class SGD(private var eta: Double = 0.01) {
 
-    private val weightGradients by lazy {
+    protected lateinit var network: Network
+
+    protected val weightGradients by lazy {
         Array(network.size, { DoubleArray(network.layerAt(it).weightsSize) })
-    }
-
-    private val prevWeightGradients by lazy {
-        Array(network.size, { DoubleArray(weightGradients[it].size) })
     }
 
     private val neuronErrors by lazy {
         Array(network.size, { DoubleArray(network.layerAt(it).size) })
     }
 
-    override fun onStartEpoch() {
+    fun setup(network: Network) {
+        this.network = network
+    }
+
+    fun onStartEpoch() {
         weightGradients.forEach { Arrays.fill(it, 0.0) }
     }
 
-    override fun trainOnSample(outputActivation: DoubleArray, outputError: DoubleArray) {
+    open fun trainOnSample(outputError: DoubleArray) {
 
         for (layerIndex in network.size - 1 downTo 1) {
             val layer = network.layerAt(layerIndex)
@@ -63,20 +66,9 @@ class SGD(eta: Double = 0.01, private val momentum: Double? = null) : Optimizer(
         }
     }
 
-    override fun updateWeights() = (1 until network.size).forEach {
-
-        val gradients = weightGradients[it]
-        momentum?.let { m ->
-            val prevGradients = prevWeightGradients[it]
-            prevGradients.forEachIndexed {gradientIndex, prevGradient ->
-                val currentGradient = gradients[gradientIndex] + prevGradient * m
-                gradients[gradientIndex] = currentGradient
-                prevGradients[gradientIndex] = currentGradient
-            }
-        }
-        network.layerAt(it).deltaWeights(gradients)
+    open fun updateWeights() = (1 until network.size).forEach {
+        network.layerAt(it).deltaWeights(weightGradients[it])
 
         Arrays.fill(weightGradients[it], 0.0)
     }
-
 }

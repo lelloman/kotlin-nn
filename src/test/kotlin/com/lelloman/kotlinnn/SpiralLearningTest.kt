@@ -5,6 +5,8 @@ import com.lelloman.kotlinnn.layer.DenseLayer
 import com.lelloman.kotlinnn.layer.GaussianWeightsInitializer
 import com.lelloman.kotlinnn.layer.InputLayer
 import com.lelloman.kotlinnn.loss.Loss
+import com.lelloman.kotlinnn.optimizer.Adagrad
+import com.lelloman.kotlinnn.optimizer.Momentum
 import com.lelloman.kotlinnn.optimizer.SGD
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
@@ -13,7 +15,7 @@ import java.util.*
 
 class SpiralLearningTest {
 
-    inner class SaveImageCallback(private val network: Network, private val folderName: String)
+    inner class Callback(private val network: Network, private val folderName: String, private val limit: Double = 0.04)
         : Training.PrintEpochCallback() {
         override fun onEpoch(epoch: Int, trainingLoss: Double, validationLoss: Double, finished: Boolean) {
             super.onEpoch(epoch, trainingLoss, validationLoss, finished)
@@ -22,7 +24,7 @@ class SpiralLearningTest {
             }
         }
 
-        override fun shouldEndTraining(trainingLoss: Double, validationLoss: Double) = validationLoss < 0.04
+        override fun shouldEndTraining(trainingLoss: Double, validationLoss: Double) = validationLoss < limit
     }
 
     private val imgSizeI = 512
@@ -113,9 +115,9 @@ class SpiralLearningTest {
         trainingSet.saveImg(folderName, "dataset")
 
         val network = makeNetwork(Activation.LOGISTIC)
-        val callback = SaveImageCallback(network, folderName)
+        val callback = Callback(network, folderName)
 
-        val optimizer = SGD(0.01)
+        val optimizer = SGD(0.1)
 
         val training = Training(network, trainingSet, validationSet, callback, epochs, optimizer = optimizer, batchSize = batchSize)
 
@@ -127,15 +129,16 @@ class SpiralLearningTest {
     }
 
     @Test
-    fun `learns spiral branch classification with logistic SGD MSE and momentum`() {
+    fun `learns spiral branch classification with logistic Momentum MSE`() {
         val folderName = "spiral_sgd_mse_momentum"
 
         trainingSet.saveImg(folderName, "dataset")
 
         val network = makeNetwork(Activation.LOGISTIC)
-        val callback = SaveImageCallback(network, folderName)
+        val limit = 0.01
+        val callback = Callback(network, folderName, limit)
 
-        val optimizer = SGD(0.01, momentum = 0.9)
+        val optimizer = Momentum(0.01, momentum = 0.9)
 
         val training = Training(network, trainingSet, validationSet, callback, epochs, optimizer = optimizer, batchSize = batchSize)
 
@@ -143,7 +146,27 @@ class SpiralLearningTest {
         training.perform()
         saveNetworkSampling(network, folderName, "trained")
 
-        assertThat(training.validationLoss()).isLessThan(0.04)
+        assertThat(training.validationLoss()).isLessThan(limit)
+    }
+
+    @Test
+    fun `learns spiral branch classification with logistic Adagrad MSE`() {
+        val folderName = "spiral_sgd_mse"
+
+        trainingSet.saveImg(folderName, "dataset")
+
+        val network = makeNetwork(Activation.LOGISTIC)
+        val limit = 0.01
+        val callback = Callback(network, folderName, limit)
+        val optimizer = Adagrad(0.0001)
+
+        val training = Training(network, trainingSet, validationSet, callback, epochs, optimizer = optimizer, batchSize = batchSize)
+
+        saveNetworkSampling(network, folderName, "before")
+        training.perform()
+        saveNetworkSampling(network, folderName, "trained")
+
+        assertThat(training.validationLoss()).isLessThan(limit)
     }
 
     @Test
@@ -153,7 +176,7 @@ class SpiralLearningTest {
         trainingSet.saveImg(folderName, "dataset")
 
         val network = makeNetwork(Activation.LOGISTIC)
-        val callback = SaveImageCallback(network, folderName)
+        val callback = Callback(network, folderName)
 
         val optimizer = SGD(0.01)
 
@@ -173,8 +196,8 @@ class SpiralLearningTest {
         trainingSet.saveImg(folderName, "dataset")
 
         val network = makeNetwork(Activation.SOFTMAX)
-        val callback = SaveImageCallback(network, folderName)
-        val optimizer = SGD(0.01)
+        val callback = Callback(network, folderName)
+        val optimizer = SGD(0.04)
 
         val training = Training(network, trainingSet, validationSet, callback, epochs, loss = Loss.CROSS_ENTROPY, optimizer = optimizer, batchSize = batchSize)
 
@@ -186,14 +209,15 @@ class SpiralLearningTest {
     }
 
     @Test
-    fun `learns spiral branch classification with softmax SGD CrossEntropy and momentum`() {
+    fun `learns spiral branch classification with softmax Momentum CrossEntropy`() {
         val folderName = "spiral_softmax_sgd_crossentropy_momentum"
 
         trainingSet.saveImg(folderName, "dataset")
 
         val network = makeNetwork(Activation.SOFTMAX)
-        val callback = SaveImageCallback(network, folderName)
-        val optimizer = SGD(0.01, momentum = 0.9)
+        val limit = 0.04
+        val callback = Callback(network, folderName, limit)
+        val optimizer = Momentum(0.01, momentum = 0.9)
 
         val training = Training(network, trainingSet, validationSet, callback, epochs, loss = Loss.CROSS_ENTROPY, optimizer = optimizer, batchSize = batchSize)
 
@@ -201,6 +225,26 @@ class SpiralLearningTest {
         training.perform()
         saveNetworkSampling(network, folderName, "trained")
 
-        assertThat(training.validationLoss()).isLessThan(0.05)
+        assertThat(training.validationLoss()).isLessThan(limit)
+    }
+
+    @Test
+    fun `learns spiral branch classification with softmax Adagrad CrossEntropy`() {
+        val folderName = "spiral_softmax_sgd_crossentropy_momentum"
+
+        trainingSet.saveImg(folderName, "dataset")
+
+        val network = makeNetwork(Activation.SOFTMAX)
+        val limit = 0.04
+        val callback = Callback(network, folderName, limit)
+        val optimizer = Adagrad(0.0001)
+
+        val training = Training(network, trainingSet, validationSet, callback, epochs, loss = Loss.CROSS_ENTROPY, optimizer = optimizer, batchSize = batchSize)
+
+        saveNetworkSampling(network, folderName, "before")
+        training.perform()
+        saveNetworkSampling(network, folderName, "trained")
+
+        assertThat(training.validationLoss()).isLessThan(limit)
     }
 }

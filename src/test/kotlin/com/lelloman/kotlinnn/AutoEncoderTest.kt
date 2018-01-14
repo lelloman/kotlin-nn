@@ -4,7 +4,7 @@ import com.lelloman.kotlinnn.activation.Activation
 import com.lelloman.kotlinnn.layer.DenseLayer
 import com.lelloman.kotlinnn.layer.GaussianWeightsInitializer
 import com.lelloman.kotlinnn.layer.InputLayer
-import com.lelloman.kotlinnn.optimizer.SGD
+import com.lelloman.kotlinnn.optimizer.Adagrad
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import java.util.*
@@ -59,12 +59,13 @@ class AutoEncoderTest {
         val callback = object : Training.PrintEpochCallback() {
             override fun shouldEndTraining(trainingLoss: Double, validationLoss: Double): Boolean {
                 success = true
-                return validationLoss < 0.01
+                return validationLoss < 0.0015
             }
         }
-        val eta = 0.001
+        val eta = 0.00001
         val batchSize = 10
-        val training = Training(network, trainingSet, validationSet, callback, epochs, optimizer = SGD(eta), batchSize = batchSize)
+        val optimizer = Adagrad(eta)
+        val training = Training(network, trainingSet, validationSet, callback, epochs, optimizer = optimizer, batchSize = batchSize)
         training.perform()
 
         ks.forEach { k ->
