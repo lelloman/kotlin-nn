@@ -16,9 +16,9 @@ abstract class LayerActivation(val size: Int) {
         derivatives[it] = funcPrime(v)
     }
 
-    abstract protected fun func(z: Double): Double
+    protected abstract fun func(z: Double): Double
 
     fun derivative(outputIndex: Int) = derivatives[outputIndex]
 
-    abstract protected fun funcPrime(y: Double): Double
+    protected abstract fun funcPrime(y: Double): Double
 }
