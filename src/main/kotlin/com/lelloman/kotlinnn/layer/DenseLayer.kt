@@ -4,12 +4,12 @@ import com.lelloman.kotlinnn.activation.Activation
 import com.lelloman.kotlinnn.activation.LayerActivation
 import com.lelloman.kotlinnn.activation.LogisticActivation
 
-open class DenseLayer internal constructor(size: Int,
-                                           prevLayer: Layer?,
-                                           hasBias: Boolean,
-                                           activationFactory: (Int) -> LayerActivation,
-                                           private val weightsInitializer: WeightsInitializer)
-    : Layer(size, prevLayer, hasBias, activationFactory) {
+open class DenseLayer(size: Int,
+                      prevLayer: Layer,
+                      hasBias: Boolean = true,
+                      activation: Activation = Activation.LOGISTIC,
+                      private val weightsInitializer: WeightsInitializer = GaussianWeightsInitializer(0.0, 0.3))
+    : Layer(size, prevLayer, hasBias, activation.factory) {
 
     private val z = DoubleArray(size)
 
@@ -60,43 +60,4 @@ open class DenseLayer internal constructor(size: Int,
     }
 
     override fun activationDerivative(index: Int) = activation.derivative(index)
-
-    class Builder {
-        constructor()
-
-        constructor(size: Int) {
-            this.size = size
-        }
-
-        private var size: Int? = null
-        private var prevLayer: Layer? = null
-        private var hasBias = true
-        private var activationFactory: (Int) -> LayerActivation = { size -> LogisticActivation(size) }
-        private var weightsInitializer: WeightsInitializer = GaussianWeightsInitializer(0.0, 0.3)
-
-        fun prevLayer(layer: Layer) = apply {
-            prevLayer = layer
-        }
-
-        fun noBias() = apply {
-            hasBias = false
-        }
-
-        fun activation(activation: Activation) = apply {
-            this.activationFactory = activation.factory
-        }
-
-        fun weightsInitializer(weightsInitializer: WeightsInitializer) = apply {
-            this.weightsInitializer = weightsInitializer
-        }
-
-        fun build(): DenseLayer {
-            if (size == null) {
-                throw IllegalStateException("Must set layer size")
-            }
-
-            return DenseLayer(size!!, prevLayer, hasBias, activationFactory, weightsInitializer)
-        }
-    }
-
 }

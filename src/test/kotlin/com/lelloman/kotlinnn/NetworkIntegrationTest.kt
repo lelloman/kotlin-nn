@@ -16,10 +16,7 @@ class NetworkIntegrationTest {
      */
     private val network1: Network by lazy {
         val inputLayer = InputLayer(1)
-        val outputLayer = DenseLayer.Builder(1)
-                .noBias()
-                .prevLayer(inputLayer)
-                .build()
+        val outputLayer = DenseLayer(1, inputLayer, hasBias = false)
         Network.Builder()
                 .addLayer(inputLayer)
                 .addLayer(outputLayer)
@@ -52,9 +49,7 @@ class NetworkIntegrationTest {
      */
     private val network2: Network by lazy {
         val inputLayer = InputLayer(1)
-        val outputLayer = DenseLayer.Builder(1)
-                .prevLayer(inputLayer)
-                .build()
+        val outputLayer = DenseLayer(1, inputLayer)
         Network.Builder()
                 .addLayer(inputLayer)
                 .addLayer(outputLayer)
@@ -89,9 +84,7 @@ class NetworkIntegrationTest {
      */
     private val network3: Network by lazy {
         val inputLayer = InputLayer(2)
-        val outputLayer = DenseLayer.Builder(1)
-                .prevLayer(inputLayer)
-                .build()
+        val outputLayer = DenseLayer(1, inputLayer)
         Network.Builder()
                 .addLayer(inputLayer)
                 .addLayer(outputLayer)
@@ -138,9 +131,7 @@ class NetworkIntegrationTest {
      */
     private val network4: Network by lazy {
         val inputLayer = InputLayer(2)
-        val outputLayer = DenseLayer.Builder(2)
-                .prevLayer(inputLayer)
-                .build()
+        val outputLayer = DenseLayer(2, inputLayer)
         Network.Builder()
                 .addLayer(inputLayer)
                 .addLayer(outputLayer)
@@ -193,13 +184,8 @@ class NetworkIntegrationTest {
     */
     private val network5: Network by lazy {
         val inputLayer = InputLayer(2)
-        val hiddenLayer = DenseLayer.Builder(2)
-                .prevLayer(inputLayer)
-                .build()
-        val outputLayer = DenseLayer.Builder(2)
-                .prevLayer(hiddenLayer)
-                .noBias()
-                .build()
+        val hiddenLayer = DenseLayer(2, inputLayer)
+        val outputLayer = DenseLayer(2, hiddenLayer, hasBias = false)
         Network.Builder()
                 .addLayer(inputLayer)
                 .addLayer(hiddenLayer)

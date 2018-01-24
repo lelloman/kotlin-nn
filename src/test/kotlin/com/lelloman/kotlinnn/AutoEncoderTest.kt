@@ -19,16 +19,9 @@ class AutoEncoderTest {
         val weightsInitializer = GaussianWeightsInitializer(0.0, 0.2, random)
 
         val input = InputLayer(waveSampleSize)
-        val encodedLayer = DenseLayer.Builder(8)
-                .prevLayer(input)
-                .activation(Activation.TANH)
-                .weightsInitializer(weightsInitializer)
-                .build()
-        val output = DenseLayer.Builder(waveSampleSize)
-                .prevLayer(encodedLayer)
-                .activation(Activation.TANH)
-                .weightsInitializer(weightsInitializer)
-                .build()
+        val encodedLayer = DenseLayer(8, input, activation = Activation.TANH, weightsInitializer = weightsInitializer)
+
+        val output = DenseLayer(waveSampleSize, encodedLayer, activation = Activation.TANH, weightsInitializer = weightsInitializer)
 
         val network = Network.Builder()
                 .addLayer(input)
