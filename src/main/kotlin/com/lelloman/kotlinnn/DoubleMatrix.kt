@@ -6,7 +6,11 @@ class DoubleMatrix(val rows: Int,
                    val columns: Int,
                    initializer: DoubleMatrixInitializer) {
 
-    constructor(rows: Int, columns: Int) : this(rows, columns, { DoubleArray(columns) })
+    constructor(rows: Int, columns: Int) : this(rows, columns, if (columns > 0) {
+        { _: Int -> DoubleArray(columns) }
+    } else {
+        { _: Int -> throw IllegalArgumentException("Dimensions size must be greater than 0, got $rows and $columns instead") }
+    })
 
     val shape = rows to columns
 
@@ -19,7 +23,7 @@ class DoubleMatrix(val rows: Int,
     })
 
     init {
-        if(rows < 1 || columns < 1){
+        if (rows < 1 || columns < 1) {
             throw IllegalArgumentException("Dimensions size must be greater than 0, got $rows and $columns instead")
         }
     }
