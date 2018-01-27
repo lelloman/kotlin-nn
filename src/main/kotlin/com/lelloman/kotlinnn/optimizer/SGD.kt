@@ -32,7 +32,7 @@ open class SGD(private var eta: Double = 0.01) {
             val layerError = neuronErrors[layerIndex]
             var weightOffset = 0
             val activation = layer.output
-            val prevActivation = layer.prevLayer!!.output
+            val prevActivation = layer.inputLayer!!.output
 
             val isOutputLayer = layerIndex == network.size - 1
 
@@ -55,7 +55,7 @@ open class SGD(private var eta: Double = 0.01) {
                 deltaError *= layer.activationDerivative(i)
                 layerError[i] = deltaError
                 if (layer.isTrainable()) {
-                    for (j in 0 until layer.prevLayer.size) {
+                    for (j in 0 until layer.inputLayer.size) {
                         layerGradients[weightOffset++] += eta * deltaError * prevActivation[j]
                     }
                     if (layer.hasBias) {

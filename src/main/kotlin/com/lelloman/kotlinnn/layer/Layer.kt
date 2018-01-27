@@ -3,7 +3,7 @@ package com.lelloman.kotlinnn.layer
 import com.lelloman.kotlinnn.activation.LayerActivation
 
 abstract class Layer(val size: Int,
-                     val prevLayer: Layer?,
+                     val inputLayer: Layer?,
                      val hasBias: Boolean,
                      activationFactory: (Int) -> LayerActivation) {
 

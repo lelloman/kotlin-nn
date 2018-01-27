@@ -2,8 +2,8 @@ package com.lelloman.kotlinnn
 
 typealias DoubleMatrixInitializer = (row: Int) -> DoubleArray
 
-class DoubleMatrix(val rows: Int,
-                   val columns: Int,
+class DoubleMatrix(rows: Int,
+                   columns: Int,
                    initializer: DoubleMatrixInitializer) {
 
     constructor(rows: Int, columns: Int) : this(rows, columns, if (columns > 0) {
