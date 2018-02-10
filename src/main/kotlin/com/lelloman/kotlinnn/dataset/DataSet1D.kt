@@ -17,7 +17,7 @@ class DataSet1D(input: Array<DoubleArray>,
 
     init {
         if (input.size != output.size) {
-            throw IllegalArgumentException("DataSet input and output must have equal size, input has ${input.size} samples while output has ${output.size}")
+            throw IllegalArgumentException("DataSet input and output must have equal inputWidth, input has ${input.size} samples while output has ${output.size}")
         }
 
         if (input.isEmpty()) {
@@ -27,14 +27,14 @@ class DataSet1D(input: Array<DoubleArray>,
         val inputSize= input[0].size
         input.forEachIndexed { index, value ->
             if (inputSize != value.size) {
-                throw IllegalArgumentException("All input samples must have the same dimension, input sample at index 0 has size $inputSize while input sample at index $index has ${value.size}")
+                throw IllegalArgumentException("All input samples must have the same dimension, input sample at index 0 has inputWidth $inputSize while input sample at index $index has ${value.size}")
             }
         }
 
         val outputSize = output[0].size
         output.forEachIndexed { index, value ->
             if (outputSize != value.size) {
-                throw IllegalArgumentException("All output samples must have the same dimension, output sample at index 0 has size $outputSize while output sample at index $index has ${value.size}")
+                throw IllegalArgumentException("All output samples must have the same dimension, output sample at index 0 has inputWidth $outputSize while output sample at index $index has ${value.size}")
             }
         }
 

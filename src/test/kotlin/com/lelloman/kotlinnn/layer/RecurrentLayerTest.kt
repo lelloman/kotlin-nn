@@ -101,25 +101,25 @@ class RecurrentLayerTest {
         rnn.setWeights(doubleArrayOf(w1, w2))
 
         val input0 = random.nextDouble()
-        inputLayer.setActivation(doubleArrayOf(input0))
+        inputLayer.setActivation(arrayOf(doubleArrayOf(input0)))
         rnn.computeActivation()
 
         val activation0 = w1 * input0
-        assertThat(rnn.output).isEqualTo(doubleArrayOf(activation0))
+        assertThat(rnn.output).isEqualTo(arrayOf(doubleArrayOf(activation0)))
 
         val input1 = random.nextDouble()
-        inputLayer.setActivation(doubleArrayOf(input1))
+        inputLayer.setActivation(arrayOf(doubleArrayOf(input1)))
         rnn.computeActivation()
 
         val activation1 = input1 * w1 + activation0 * w2
-        assertThat(rnn.output).isEqualTo(doubleArrayOf(activation1))
+        assertThat(rnn.output).isEqualTo(arrayOf(doubleArrayOf(activation1)))
 
         val input2 = random.nextDouble()
-        inputLayer.setActivation(doubleArrayOf(input2))
+        inputLayer.setActivation(arrayOf(doubleArrayOf(input2)))
         rnn.computeActivation()
 
         val activation2 = input2 * w1 + activation1 * w2
-        assertThat(rnn.output).isEqualTo(doubleArrayOf(activation2))
+        assertThat(rnn.output).isEqualTo(arrayOf(doubleArrayOf(activation2)))
     }
 
     @Test
@@ -132,32 +132,32 @@ class RecurrentLayerTest {
         rnn.setWeights(doubleArrayOf(w1, w2, w3))
 
         val input0 = random.nextDouble()
-        inputLayer.setActivation(doubleArrayOf(input0))
+        inputLayer.setActivation(arrayOf(doubleArrayOf(input0)))
         rnn.computeActivation()
 
         val activation0 = w1 * input0 + w2
-        assertThat(rnn.output).isEqualTo(doubleArrayOf(activation0))
+        assertThat(rnn.output).isEqualTo(arrayOf(doubleArrayOf(activation0)))
 
         val input1 = random.nextDouble()
-        inputLayer.setActivation(doubleArrayOf(input1))
+        inputLayer.setActivation(arrayOf(doubleArrayOf(input1)))
         rnn.computeActivation()
 
         val activation1 = input1 * w1 + w2 + activation0 * w3
-        assertThat(rnn.output).isEqualTo(doubleArrayOf(activation1))
+        assertThat(rnn.output).isEqualTo(arrayOf(doubleArrayOf(activation1)))
 
         val input2 = random.nextDouble()
-        inputLayer.setActivation(doubleArrayOf(input2))
+        inputLayer.setActivation(arrayOf(doubleArrayOf(input2)))
         rnn.computeActivation()
 
         val activation2 = input2 * w1 + w2 + activation1 * w3
-        assertThat(rnn.output).isEqualTo(doubleArrayOf(activation2))
+        assertThat(rnn.output).isEqualTo(arrayOf(doubleArrayOf(activation2)))
     }
 
 
     @Test
     fun `computes activation with 2 units and bias on input with size 2`() {
         val inputLayer = InputLayer(2)
-        val activationFun = Activation.LOGISTIC.factory.invoke(2)
+        val activationFun = Activation.LOGISTIC.factory.invoke(1, 2)
         val rnn = RecurrentLayer(2, inputLayer, hasBias = true, activation = Activation.LOGISTIC)
         val weightsSize = 2 * (2 + 1) + 2 * 2
         val weights = DoubleArray(weightsSize, { random.nextDouble() })
@@ -166,21 +166,21 @@ class RecurrentLayerTest {
         val weightsU = DoubleArray(2 * 2, { weights[weightsW.size + it] })
 
         val input0 = doubleArrayOf(random.nextDouble(), random.nextDouble())
-        inputLayer.setActivation(input0)
+        inputLayer.setActivation(arrayOf(input0))
         rnn.computeActivation()
 
-        activationFun.perform(doubleArrayOf(
+        activationFun.perform(0, doubleArrayOf(
                 input0[0] * weightsW[0] + input0[1] * weightsW[1] + weightsW[2],
                 input0[0] * weightsW[3] + input0[1] * weightsW[4] + weightsW[5]
         ))
-        val activation0 = activationFun.output.clone()
-        assertThat(rnn.output).isEqualTo(activation0)
+        val activation0 = activationFun.output[0].clone()
+        assertThat(rnn.output).isEqualTo(arrayOf(activation0))
 
         val input1 = doubleArrayOf(random.nextDouble(), random.nextDouble())
-        inputLayer.setActivation(input1)
+        inputLayer.setActivation(arrayOf(input1))
         rnn.computeActivation()
 
-        activationFun.perform(doubleArrayOf(
+        activationFun.perform(0, doubleArrayOf(
                 input1[0] * weightsW[0] + input1[1] * weightsW[1] + weightsW[2] + activation0[0] * weightsU[0] + activation0[1] * weightsU[1],
                 input1[0] * weightsW[3] + input1[1] * weightsW[4] + weightsW[5] + activation0[0] * weightsU[2] + activation0[1] * weightsU[3]
         ))

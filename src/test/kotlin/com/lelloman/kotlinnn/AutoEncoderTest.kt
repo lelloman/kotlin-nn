@@ -19,7 +19,7 @@ class AutoEncoderTest {
         val random = Random(1)
         val weightsInitializer = GaussianWeightsInitializer(0.0, 0.2, random)
 
-        val input = InputLayer(waveSampleSize)
+        val input = InputLayer(1, waveSampleSize)
         val encodedLayer = DenseLayer(8, input, activation = Activation.TANH, weightsInitializer = weightsInitializer)
 
         val output = DenseLayer(waveSampleSize, encodedLayer, activation = Activation.TANH, weightsInitializer = weightsInitializer)
@@ -64,7 +64,7 @@ class AutoEncoderTest {
 
         ks.forEach { k ->
             val wave = DoubleArray(waveSampleSize, { Math.sin(it * k) })
-            val reconstructed = network.forwardPass(wave)
+            val reconstructed = network.forwardPass(arrayOf(wave))
             val a = Array(wave.size, { "%+.2f".format(wave[it]) })
             val b = Array(wave.size, { "%+.2f".format(reconstructed[it]) })
             println("original: ${a.joinToString(",")}")

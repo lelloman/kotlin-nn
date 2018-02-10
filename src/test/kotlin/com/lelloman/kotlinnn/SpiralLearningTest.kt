@@ -53,7 +53,7 @@ class SpiralLearningTest {
         for (x in 0 until imgSizeI) {
             val xd = x.toDouble() / imgSizeD
             for (y in 0 until imgSizeI) {
-                val outSample = network.forwardPass(doubleArrayOf(xd, y / imgSizeD))
+                val outSample = network.forwardPass(arrayOf(doubleArrayOf(xd, y / imgSizeD)))[0]
 
                 val r = (255 * Math.max(0.0, Math.min(1.0, outSample[0]))).toInt().shl(16)
                 val g = (255 * Math.max(0.0, Math.min(1.0, outSample[1]))).toInt().shl(8)

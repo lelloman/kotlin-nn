@@ -29,14 +29,14 @@ class NetworkIntegrationTest {
             doubleArrayOf(-0.25)
     )
 
-    private fun forwardPass1(input: Double, weights: DoubleArray) = doubleArrayOf(logistic(0.0 + input * weights[0]))
+    private fun forwardPass1(input: Double, weights: DoubleArray) = arrayOf(doubleArrayOf(logistic(0.0 + input * weights[0])))
 
     @Test
     fun `check network 1 forward pass`() {
         networkWeights1.forEach { weights ->
             network1.layerAt(1).setWeights(weights)
             doubleArrayOf(0.0, -1.0, -.5, .5, 1.0, 100.0, -100.0).forEach { input ->
-                assertThat(network1.forwardPass(doubleArrayOf(input)))
+                assertThat(network1.forwardPass(arrayOf(doubleArrayOf(input))))
                         .isEqualTo(forwardPass1(input, weights))
             }
         }
@@ -63,14 +63,14 @@ class NetworkIntegrationTest {
     )
 
     private fun forwardPass2(input: Double, weights: DoubleArray) =
-            doubleArrayOf(logistic(input * weights[0] + weights[1]))
+            arrayOf(doubleArrayOf(logistic(input * weights[0] + weights[1])))
 
     @Test
     fun `check network 2 forward pass`() {
         networkWeights2.forEach { weights ->
             network2.layerAt(1).setWeights(weights)
             doubleArrayOf(0.0, -1.0, -.5, .5, 1.0, 100.0, -100.0).forEach { input ->
-                assertThat(network2.forwardPass(doubleArrayOf(input)))
+                assertThat(network2.forwardPass(arrayOf(doubleArrayOf(input))))
                         .isEqualTo(forwardPass2(input, weights))
             }
         }
@@ -97,12 +97,12 @@ class NetworkIntegrationTest {
             doubleArrayOf(-0.25, -0.5, -.3)
     )
 
-    private fun forwardPass3(input: DoubleArray, weights: DoubleArray): DoubleArray {
+    private fun forwardPass3(input: DoubleArray, weights: DoubleArray): Array<DoubleArray> {
         var v = 0.0
         v += input[0] * weights[0]
         v += input[1] * weights[1]
         v += weights[2]
-        return doubleArrayOf(logistic(v))
+        return arrayOf(doubleArrayOf(logistic(v)))
     }
 
     @Test
@@ -117,7 +117,7 @@ class NetworkIntegrationTest {
                     doubleArrayOf(100.0, -23.0),
                     doubleArrayOf(-100.0, 0.0)
             ).forEach { input ->
-                assertThat(network3.forwardPass(input))
+                assertThat(network3.forwardPass(arrayOf(input)))
                         .isEqualTo(forwardPass3(input, weights))
             }
         }
@@ -144,7 +144,7 @@ class NetworkIntegrationTest {
             doubleArrayOf(-0.25, -0.5, -.3, .023, -1.0, .3)
     )
 
-    private fun forwardPass4(input: DoubleArray, weights: DoubleArray): DoubleArray {
+    private fun forwardPass4(input: DoubleArray, weights: DoubleArray): Array<DoubleArray> {
         var v1 = 0.0
         v1 += input[0] * weights[0]
         v1 += input[1] * weights[1]
@@ -155,7 +155,7 @@ class NetworkIntegrationTest {
         v2 += input[1] * weights[4]
         v2 += weights[5]
 
-        return doubleArrayOf(logistic(v1), logistic(v2))
+        return arrayOf(doubleArrayOf(logistic(v1), logistic(v2)))
     }
 
     @Test
@@ -170,7 +170,7 @@ class NetworkIntegrationTest {
                     doubleArrayOf(100.0, -23.0),
                     doubleArrayOf(-100.0, 0.0)
             ).forEach { input ->
-                assertThat(network4.forwardPass(input))
+                assertThat(network4.forwardPass(arrayOf(input)))
                         .isEqualTo(forwardPass4(input, weights))
             }
         }
@@ -199,7 +199,7 @@ class NetworkIntegrationTest {
             doubleArrayOf(-0.25, -0.5, -.3, .023, -1.0, .3) to doubleArrayOf(-.1, -.1, .1, 0.0)
     )
 
-    private fun forwardPass5(input: DoubleArray, weights: Pair<DoubleArray, DoubleArray>): DoubleArray {
+    private fun forwardPass5(input: DoubleArray, weights: Pair<DoubleArray, DoubleArray>): Array<DoubleArray >{
         val w1 = weights.first
         val w2 = weights.second
 
@@ -224,7 +224,7 @@ class NetworkIntegrationTest {
         v22 += h1 * w2[2]
         v22 += h2 * w2[3]
 
-        return doubleArrayOf(logistic(v21), logistic(v22))
+        return arrayOf(doubleArrayOf(logistic(v21), logistic(v22)))
     }
 
     @Test
@@ -240,7 +240,7 @@ class NetworkIntegrationTest {
                     doubleArrayOf(100.0, -23.0),
                     doubleArrayOf(-100.0, 0.0)
             ).forEach { input ->
-                assertThat(network5.forwardPass(input))
+                assertThat(network5.forwardPass(arrayOf(input)))
                         .isEqualTo(forwardPass5(input, weights))
             }
         }

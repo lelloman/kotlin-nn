@@ -2,26 +2,36 @@ package com.lelloman.kotlinnn.layer
 
 import com.lelloman.kotlinnn.activation.Activation
 
-class RecurrentLayer(size: Int,
-                     inputLayer: Layer,
-                     private val returnSequence: Boolean = true,
-                     hasBias: Boolean = true,
-                     activation: Activation = Activation.LOGISTIC,
-                     private val weightsInitializer: WeightsInitializer = GaussianWeightsInitializer(0.0, 0.3))
-    : Layer(size, inputLayer, hasBias, activation.factory) {
+class RecurrentLayer(
+        sequenceLength: Int,
+        size: Int,
+        inputLayer: Layer,
+        private val returnSequence: Boolean = true,
+        hasBias: Boolean = true,
+        activation: Activation = Activation.LOGISTIC,
+        private val weightsInitializer: WeightsInitializer = GaussianWeightsInitializer(0.0, 0.3))
+    : Layer(sequenceLength, size, inputLayer, hasBias, activation.factory) {
+
+    constructor(size: Int,
+                inputLayer: Layer,
+                returnSequence: Boolean = true,
+                hasBias: Boolean = true,
+                activation: Activation = Activation.LOGISTIC,
+                weightsInitializer: WeightsInitializer = GaussianWeightsInitializer(0.0, 0.3))
+    : this(1, size, inputLayer, returnSequence, hasBias, activation, weightsInitializer)
 
     private val z = DoubleArray(size)
     private val prevActivation = DoubleArray(size)
 
-    private val weightsW: DoubleArray = DoubleArray(size * inputLayer!!.size + (if (hasBias) size else 0), { 0.0 })
+    private val weightsW: DoubleArray = DoubleArray(size * inputLayer!!.inputWidth + (if (hasBias) size else 0), { 0.0 })
     private val weightsU: DoubleArray = DoubleArray(size * size, { 0.0 })
 
     override val weightsSize: Int = weightsW.size + weightsU.size
 
     override fun setWeights(weights: DoubleArray) {
         if (weights.size != this.weightsSize) {
-            throw IllegalArgumentException("Weights size is supposed to be ${this.weightsSize} for this layer but" +
-                    "argument has size ${weights.size}")
+            throw IllegalArgumentException("Weights inputWidth is supposed to be ${this.weightsSize} for this layer but" +
+                    "argument has inputWidth ${weights.size}")
         }
 
         System.arraycopy(weights, 0, this.weightsW, 0, weightsW.size)
@@ -35,8 +45,8 @@ class RecurrentLayer(size: Int,
 
     override fun deltaWeights(delta: DoubleArray) {
         if (weightsSize != delta.size) {
-            throw IllegalArgumentException("Weight updates size is supposed to be $weightsSize for this layer but" +
-                    "argument has size ${delta.size}")
+            throw IllegalArgumentException("Weight updates inputWidth is supposed to be $weightsSize for this layer but" +
+                    "argument has inputWidth ${delta.size}")
         }
 
         (0 until weightsW.size).forEach { weightsW[it] += delta[it] }
@@ -52,12 +62,12 @@ class RecurrentLayer(size: Int,
     override fun computeActivation() {
         if (!returnSequence) TODO("RecurrentLayer not returning sequences is not implemented yet")
 
-        val input = inputLayer!!.output
+        val input = inputLayer!!.output[0]
         val inputSize = input.size
 
         var weightOffsetW = 0
 
-        for (i in 0 until size) {
+        for (i in 0 until inputWidth) {
             var v = (0 until inputSize).sumByDouble { input[it] * weightsW[weightOffsetW++] }
             if (hasBias) {
                 v += weightsW[weightOffsetW++]
@@ -66,18 +76,18 @@ class RecurrentLayer(size: Int,
         }
 
         var weightOffsetU = 0
-        for (i in 0 until size) {
-            z[i] += (0 until size).sumByDouble { prevActivation[it] * weightsU[weightOffsetU++] }
+        for (i in 0 until inputWidth) {
+            z[i] += (0 until inputWidth).sumByDouble { prevActivation[it] * weightsU[weightOffsetU++] }
         }
 
         if (isTraining) {
-            activation.performWithDerivative(z)
+            activation.performWithDerivative(0, z)
         } else {
-            activation.perform(z)
+            activation.perform(0, z)
         }
 
-        System.arraycopy(output, 0, prevActivation, 0, size)
+        System.arraycopy(output[0], 0, prevActivation, 0, inputWidth)
     }
 
-    override fun activationDerivative(index: Int) = activation.derivative(index)
+    override fun activationDerivative(sequenceIndex: Int, index: Int) = activation.derivative(sequenceIndex, index)
 }

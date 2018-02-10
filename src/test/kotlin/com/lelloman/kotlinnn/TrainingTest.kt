@@ -1,5 +1,6 @@
 package com.lelloman.kotlinnn
 
+import com.lelloman.kotlinnn.dataset.DataSet1D
 import com.lelloman.kotlinnn.loss.Loss
 import com.lelloman.kotlinnn.loss.LossFunction
 import com.lelloman.kotlinnn.optimizer.SGD
@@ -15,10 +16,10 @@ class TrainingTest {
     private val validationSetSize = 10
     private val dataDimension = 3
 
-    private val trainingSet = spy(DataSet.Builder(trainingSetSize)
+    private val trainingSet = spy(DataSet1D.Builder(trainingSetSize)
             .add { _ -> DoubleArray(dataDimension) to DoubleArray(dataDimension) }
             .build())
-    private val validationSet = DataSet.Builder(validationSetSize)
+    private val validationSet = DataSet1D.Builder(validationSetSize)
             .add { _ -> DoubleArray(dataDimension) to DoubleArray(dataDimension) }
             .build()
 
@@ -34,10 +35,10 @@ class TrainingTest {
     @Before
     fun setUp() {
         whenever(loss.factory).thenReturn({ lossFunction })
-        whenever(network.output).thenReturn(DoubleArray(dataDimension))
-        whenever(network.forwardPass(any())).thenReturn(DoubleArray(dataDimension))
+        whenever(network.output).thenReturn(arrayOf(DoubleArray(dataDimension)))
+        whenever(network.forwardPass(any())).thenReturn(arrayOf(DoubleArray(dataDimension)))
         whenever(lossFunction.getEpochLoss()).thenReturn(0.0)
-        whenever(lossFunction.onEpochSample(any(), any())).thenReturn(DoubleArray(0))
+        whenever(lossFunction.onEpochSample(any(), any())).thenReturn(arrayOf(DoubleArray(0)))
     }
 
     @Test
@@ -88,7 +89,7 @@ class TrainingTest {
         verify(callback, epochsTimes).shouldEndTraining(any(), any())
         verify(callback, epochsTimes).onEpoch(any(), any(), any(), any())
 
-        verify(lossFunction, epochsTimes).onEpochStarted(any(), any())
+        verify(lossFunction, epochsTimes).onEpochStarted(any(), any(), any())
         verify(lossFunction, epochsTimes).compute(network, validationSet)
         verify(lossFunction, epochsTimes).getEpochLoss()
 

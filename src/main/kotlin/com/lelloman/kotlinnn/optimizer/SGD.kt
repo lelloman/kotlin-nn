@@ -12,7 +12,7 @@ open class SGD(private var eta: Double = 0.01) {
     }
 
     internal val neuronErrors by lazy {
-        Array(network.size, { DoubleArray(network.layerAt(it).size) })
+        Array(network.size, { DoubleArray(network.layerAt(it).inputWidth) })
     }
 
     fun setup(network: Network) {
@@ -23,7 +23,12 @@ open class SGD(private var eta: Double = 0.01) {
         weightGradients.forEach { Arrays.fill(it, 0.0) }
     }
 
-    open fun trainOnSample(outputError: DoubleArray) {
+    open fun trainOnSample(outputError: Array<DoubleArray>) {
+
+        if (outputError.size != 1) {
+            throw RuntimeException("Sequence learning not supported")
+        }
+        val outputError = outputError[0]
 
         for (layerIndex in network.size - 1 downTo 1) {
             val layer = network.layerAt(layerIndex)
@@ -32,7 +37,7 @@ open class SGD(private var eta: Double = 0.01) {
             val layerError = neuronErrors[layerIndex]
             var weightOffset = 0
             val activation = layer.output
-            val prevActivation = layer.inputLayer!!.output
+            val prevActivation = layer.inputLayer!!.output[0]
 
             val isOutputLayer = layerIndex == network.size - 1
 
@@ -52,10 +57,10 @@ open class SGD(private var eta: Double = 0.01) {
                     }
                 }
 
-                deltaError *= layer.activationDerivative(i)
+                deltaError *= layer.activationDerivative(0, i)
                 layerError[i] = deltaError
                 if (layer.isTrainable()) {
-                    for (j in 0 until layer.inputLayer.size) {
+                    for (j in 0 until layer.inputLayer.inputWidth) {
                         layerGradients[weightOffset++] += eta * deltaError * prevActivation[j]
                     }
                     if (layer.hasBias) {

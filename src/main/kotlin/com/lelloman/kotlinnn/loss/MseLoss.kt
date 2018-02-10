@@ -7,30 +7,38 @@ internal class MseLoss : LossFunction {
 
     internal var loss = 0.0
     internal var dataSetSize = 0
-    internal lateinit var gradients: DoubleArray
+    internal lateinit var gradients: Array<DoubleArray>
 
-    override fun onEpochStarted(outputSize: Int, dataSetSize: Int) {
+    override fun onEpochStarted(sequenceLength: Int, outputSize: Int, dataSetSize: Int) {
         this.dataSetSize = dataSetSize
-        gradients = DoubleArray(outputSize)
+        gradients = Array(sequenceLength, { DoubleArray(outputSize) })
         loss = 0.0
     }
 
-    override fun onEpochSample(activation: DoubleArray, target: DoubleArray): DoubleArray {
-        loss += activation.mapIndexed { index, v ->
-            val diff = target[index] - v
-            gradients[index] = diff
-            val e = Math.pow(diff, 2.0)
-            e
-        }.sum() / dataSetSize
+    override fun onEpochSample(activationSequence: Array<DoubleArray>, targetSequence: Array<DoubleArray>): Array<DoubleArray> {
+        if(activationSequence.size != 1 || targetSequence.size != 1){
+            throw RuntimeException("Sequence learning not supported")
+        }
+        (0 until activationSequence.size).forEach { sequenceIndex ->
+            val activation = activationSequence[sequenceIndex]
+            val target = targetSequence[sequenceIndex]
+            val gradients = gradients[sequenceIndex]
+            loss += activation.mapIndexed { index, v ->
+                val diff = target[index] - v
+                gradients[index] = diff
+                val e = Math.pow(diff, 2.0)
+                e
+            }.sum() / dataSetSize
+        }
         return gradients
     }
 
     override fun getEpochLoss(): Double = loss
 
     override fun compute(network: Network, dataSet: DataSet): Double {
-        onEpochStarted(network.output.size, dataSet.size)
+        onEpochStarted(dataSet.outputDimension.first, dataSet.outputDimension.second, dataSet.size)
         dataSet.samples.map { (inSample, outSample) ->
-            onEpochSample(network.forwardPass(inSample[0]), outSample[0])
+            onEpochSample(network.forwardPass(inSample), outSample)
         }
         return loss
     }
