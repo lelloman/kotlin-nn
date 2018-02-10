@@ -1,6 +1,7 @@
 package com.lelloman.kotlinnn
 
 import com.lelloman.kotlinnn.activation.Activation
+import com.lelloman.kotlinnn.dataset.DataSet1D
 import com.lelloman.kotlinnn.layer.DenseLayer
 import com.lelloman.kotlinnn.layer.GaussianWeightsInitializer
 import com.lelloman.kotlinnn.layer.InputLayer
@@ -39,11 +40,11 @@ class AutoEncoderTest {
             val s = DoubleArray(waveSampleSize, { Math.sin(it * k) })
             println("k $k ${s.joinToString("")}")
         }
-        val trainingSet = DataSet.Builder(10000)
+        val trainingSet = DataSet1D.Builder(10000)
                 .add(sample)
                 .build()
 
-        val validationSet = DataSet.Builder(100)
+        val validationSet = DataSet1D.Builder(100)
                 .add(sample)
                 .build()
 

@@ -1,6 +1,6 @@
 package com.lelloman.kotlinnn.loss
 
-import com.lelloman.kotlinnn.DataSet
+import com.lelloman.kotlinnn.dataset.DataSet
 import com.lelloman.kotlinnn.Network
 
 internal class CrossEntropyLoss : LossFunction {
@@ -32,8 +32,8 @@ internal class CrossEntropyLoss : LossFunction {
 
     override fun compute(network: Network, dataSet: DataSet): Double {
         onEpochStarted(network.output.size, dataSet.size)
-        dataSet.map { inSample, outSample ->
-            onEpochSample(network.forwardPass(inSample), outSample)
+        dataSet.samples.map { (inSample, outSample) ->
+            onEpochSample(network.forwardPass(inSample[0]), outSample[0])
         }
         return loss
     }

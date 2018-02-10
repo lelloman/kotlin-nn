@@ -1,5 +1,6 @@
 package com.lelloman.kotlinnn
 
+import com.lelloman.kotlinnn.dataset.DataSet
 import com.lelloman.kotlinnn.loss.Loss
 import com.lelloman.kotlinnn.optimizer.SGD
 
@@ -61,9 +62,9 @@ class Training(private val network: Network,
 
         var sampleIndex = 0
 
-        trainingSet.forEach { input, targetOutput ->
-            val outputActivation = network.forwardPass(input)
-            val error = loss.onEpochSample(outputActivation, targetOutput)
+        trainingSet.forEach { (input, targetOutput) ->
+            val outputActivation = network.forwardPass(input[0])
+            val error = loss.onEpochSample(outputActivation, targetOutput[0])
 
             optimizer.trainOnSample(error)
             if (++sampleIndex >= batchSize) {

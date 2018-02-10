@@ -1,5 +1,6 @@
 package com.lelloman.kotlinnn
 
+import com.lelloman.kotlinnn.dataset.DataSet1D
 import java.awt.Color
 import java.awt.image.BufferedImage
 import java.io.File
@@ -41,7 +42,7 @@ fun Boolean.toDouble() = if (this) 1.0 else 0.0
 fun xorSample(a: Double, b: Double) = a.toBoolean().xor(b.toBoolean()).toDouble()
 fun orSample(a: Double, b: Double) = a.toBoolean().or(b.toBoolean()).toDouble()
 
-fun logicGateDataSet(size: Int, f: (a: Double, b: Double) -> Double, random: Random = Random()) = DataSet.Builder(size)
+fun logicGateDataSet(size: Int, f: (a: Double, b: Double) -> Double, random: Random = Random()) = DataSet1D.Builder(size)
         .add {
             val x = doubleArrayOf(random.nextBoolean().toDouble(), random.nextBoolean().toDouble())
             x to doubleArrayOf(f(x[0], x[1]))
@@ -49,7 +50,7 @@ fun logicGateDataSet(size: Int, f: (a: Double, b: Double) -> Double, random: Ran
         .random(random)
         .build()
 
-fun xorDataSet(size: Int, random: Random) = DataSet.Builder(size)
+fun xorDataSet(size: Int, random: Random) = DataSet1D.Builder(size)
         .add {
             val x = doubleArrayOf(random.nextBoolean().toDouble(), random.nextBoolean().toDouble())
             x to doubleArrayOf(xorSample(x[0], x[1]))
@@ -74,9 +75,9 @@ object SpiralDataSet {
         doubleArrayOf(x, y) to DoubleArray(3, { (it == j).toDouble() })
     }
 
-    fun make(size: Int, random: Random = Random()): DataSet {
+    fun make(size: Int, random: Random = Random()): DataSet1D {
         this.random = random
-        return DataSet.Builder(size)
+        return DataSet1D.Builder(size)
                 .add(spiralSample)
                 .random(random)
                 .build()

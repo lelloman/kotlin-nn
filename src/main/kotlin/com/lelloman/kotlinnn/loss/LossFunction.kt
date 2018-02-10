@@ -1,6 +1,6 @@
 package com.lelloman.kotlinnn.loss
 
-import com.lelloman.kotlinnn.DataSet
+import com.lelloman.kotlinnn.dataset.DataSet
 import com.lelloman.kotlinnn.Network
 
 interface LossFunction {
