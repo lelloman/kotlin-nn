@@ -5,9 +5,9 @@ import com.lelloman.kotlinnn.Network
 
 internal class MseLoss : LossFunction {
 
-    private var loss = 0.0
-    private var dataSetSize = 0
-    private lateinit var gradients: DoubleArray
+    internal var loss = 0.0
+    internal var dataSetSize = 0
+    internal lateinit var gradients: DoubleArray
 
     override fun onEpochStarted(outputSize: Int, dataSetSize: Int) {
         this.dataSetSize = dataSetSize
