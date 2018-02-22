@@ -3,7 +3,7 @@ package com.lelloman.kotlinnn
 import com.lelloman.kotlinnn.loss.Loss
 import com.lelloman.kotlinnn.optimizer.SGD
 
-open class Training(private val network: Network,
+class Training(private val network: Network,
                     private val trainingSet: DataSet,
                     private val validationSet: DataSet,
                     private val callback: EpochCallback,
@@ -28,7 +28,7 @@ open class Training(private val network: Network,
     init {
         if (trainingSet.sameDimensionAs(validationSet).not()) {
             throw IllegalArgumentException("Training set and validation set must have same dimensions, training " +
-                    "input/output dimensions are ${trainingSet.inputDimension}/${trainingSet.outputDimension} while" +
+                    "input/output dimensions are ${trainingSet.inputDimension}/${trainingSet.outputDimension} while " +
                     "validation ones are ${validationSet.inputDimension}/${validationSet.outputDimension}")
         }
 
