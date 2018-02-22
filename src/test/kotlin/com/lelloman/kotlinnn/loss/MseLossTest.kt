@@ -11,8 +11,6 @@ class MseLossTest {
 
     private val mseLoss = MseLoss()
 
-    private lateinit var network: Network
-
     @Test
     fun `reinitializes values on epoch start`() {
         mseLoss.onEpochStarted(10, 10)
@@ -58,7 +56,7 @@ class MseLossTest {
         var i = 0
         val values = Array(3, { doubleArrayOf(it + 1.0) })
 
-        network = mock {
+        val network: Network = mock {
             on { forwardPass(any()) }.thenAnswer { values[i++] }
             on { output }.thenReturn(doubleArrayOf(0.0))
         }

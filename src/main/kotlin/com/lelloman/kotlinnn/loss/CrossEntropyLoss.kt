@@ -5,9 +5,9 @@ import com.lelloman.kotlinnn.Network
 
 internal class CrossEntropyLoss : LossFunction {
 
-    private var loss = 0.0
-    private var dataSetSize = 0
-    private lateinit var gradients: DoubleArray
+    internal var loss = 0.0
+    internal var dataSetSize = 0
+    internal lateinit var gradients: DoubleArray
 
     override fun onEpochStarted(outputSize: Int, dataSetSize: Int) {
         this.dataSetSize = dataSetSize
@@ -16,13 +16,15 @@ internal class CrossEntropyLoss : LossFunction {
     }
 
     override fun onEpochSample(activation: DoubleArray, target: DoubleArray): DoubleArray {
-        loss += activation.mapIndexed { index, y ->
+        val sum = activation.mapIndexed { index, y ->
             val t = target[index]
-            val oneMinusY = 1 - y
+            val oneMinusY = (1 - y)
 
-            gradients[index] = -(y - t) / (y * oneMinusY)
-            -t * Math.log(y) - (1 - t) * Math.log(oneMinusY)
-        }.sum() / dataSetSize
+            gradients[index] = -(y - t) / ((y * oneMinusY) + EPSILON)
+            val output = -t * Math.log(y + EPSILON) - (1 - t) * Math.log(oneMinusY + EPSILON)
+            output
+        }.sum()
+        loss += sum / dataSetSize
         return gradients
     }
 
@@ -34,5 +36,9 @@ internal class CrossEntropyLoss : LossFunction {
             onEpochSample(network.forwardPass(inSample), outSample)
         }
         return loss
+    }
+
+    companion object {
+        private const val EPSILON = 0.00000000000000000000000001
     }
 }
