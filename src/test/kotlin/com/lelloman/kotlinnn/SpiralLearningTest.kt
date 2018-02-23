@@ -1,6 +1,7 @@
 package com.lelloman.kotlinnn
 
 import com.lelloman.kotlinnn.activation.Activation
+import com.lelloman.kotlinnn.dataset.DataSet1D
 import com.lelloman.kotlinnn.layer.DenseLayer
 import com.lelloman.kotlinnn.layer.GaussianWeightsInitializer
 import com.lelloman.kotlinnn.layer.InputLayer
@@ -30,8 +31,8 @@ class SpiralLearningTest {
     private val imgSizeI = 512
     private val imgSizeD = imgSizeI.toDouble()
 
-    private lateinit var trainingSet: DataSet
-    private lateinit var validationSet: DataSet
+    private lateinit var trainingSet: DataSet1D
+    private lateinit var validationSet: DataSet1D
 
     private var saveImages = false
     private val epochs = 1000
@@ -52,7 +53,7 @@ class SpiralLearningTest {
         for (x in 0 until imgSizeI) {
             val xd = x.toDouble() / imgSizeD
             for (y in 0 until imgSizeI) {
-                val outSample = network.forwardPass(doubleArrayOf(xd, y / imgSizeD))
+                val outSample = network.forwardPass(arrayOf(doubleArrayOf(xd, y / imgSizeD)))[0]
 
                 val r = (255 * Math.max(0.0, Math.min(1.0, outSample[0]))).toInt().shl(16)
                 val g = (255 * Math.max(0.0, Math.min(1.0, outSample[1]))).toInt().shl(8)
@@ -64,11 +65,14 @@ class SpiralLearningTest {
         img.save(dirName, fileName)
     }
 
-    private fun DataSet.saveImg(folderName: String, fileName: String) {
+    private fun DataSet1D.saveImg(folderName: String, fileName: String) {
 
         val dataSetImg = createImage(imgSizeD)
 
-        forEach { inSample, outSample ->
+        samples.forEach { (inSampleArr, outSampleArr) ->
+            val inSample = inSampleArr[0]
+            val outSample = outSampleArr[0]
+
             val x = (inSample[0] * imgSizeD).toInt()
             val y = (inSample[1] * imgSizeD).toInt()
 

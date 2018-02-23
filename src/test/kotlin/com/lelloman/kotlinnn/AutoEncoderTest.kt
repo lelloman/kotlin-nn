@@ -1,6 +1,7 @@
 package com.lelloman.kotlinnn
 
 import com.lelloman.kotlinnn.activation.Activation
+import com.lelloman.kotlinnn.dataset.DataSet1D
 import com.lelloman.kotlinnn.layer.DenseLayer
 import com.lelloman.kotlinnn.layer.GaussianWeightsInitializer
 import com.lelloman.kotlinnn.layer.InputLayer
@@ -18,7 +19,7 @@ class AutoEncoderTest {
         val random = Random(1)
         val weightsInitializer = GaussianWeightsInitializer(0.0, 0.2, random)
 
-        val input = InputLayer(waveSampleSize)
+        val input = InputLayer(1, waveSampleSize)
         val encodedLayer = DenseLayer(8, input, activation = Activation.TANH, weightsInitializer = weightsInitializer)
 
         val output = DenseLayer(waveSampleSize, encodedLayer, activation = Activation.TANH, weightsInitializer = weightsInitializer)
@@ -39,11 +40,11 @@ class AutoEncoderTest {
             val s = DoubleArray(waveSampleSize, { Math.sin(it * k) })
             println("k $k ${s.joinToString("")}")
         }
-        val trainingSet = DataSet.Builder(10000)
+        val trainingSet = DataSet1D.Builder(10000)
                 .add(sample)
                 .build()
 
-        val validationSet = DataSet.Builder(100)
+        val validationSet = DataSet1D.Builder(100)
                 .add(sample)
                 .build()
 
@@ -63,7 +64,7 @@ class AutoEncoderTest {
 
         ks.forEach { k ->
             val wave = DoubleArray(waveSampleSize, { Math.sin(it * k) })
-            val reconstructed = network.forwardPass(wave)
+            val reconstructed = network.forwardPass(arrayOf(wave))[0]
             val a = Array(wave.size, { "%+.2f".format(wave[it]) })
             val b = Array(wave.size, { "%+.2f".format(reconstructed[it]) })
             println("original: ${a.joinToString(",")}")

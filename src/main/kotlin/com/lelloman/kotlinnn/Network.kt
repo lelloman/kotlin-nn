@@ -16,7 +16,7 @@ class Network private constructor(private val layers: Array<Layer>) {
         }
     }
 
-    fun forwardPass(input: DoubleArray): DoubleArray {
+    fun forwardPass(input: Array<DoubleArray>): Array<DoubleArray> {
         layers[0].setActivation(input)
 
         forwardLayers.forEach { it.computeActivation() }

@@ -12,7 +12,7 @@ open class SGD(private var eta: Double = 0.01) {
     }
 
     internal val neuronErrors by lazy {
-        Array(network.size, { DoubleArray(network.layerAt(it).size) })
+        Array(network.size, { DoubleArray(network.layerAt(it).outputWidth) })
     }
 
     fun setup(network: Network) {
@@ -23,7 +23,12 @@ open class SGD(private var eta: Double = 0.01) {
         weightGradients.forEach { Arrays.fill(it, 0.0) }
     }
 
-    open fun trainOnSample(outputError: DoubleArray) {
+    open fun trainOnSample(outputErrorSeq: Array<DoubleArray>) {
+
+        if (outputErrorSeq.size != 1) {
+            throw RuntimeException("Sequence learning not supported")
+        }
+        val outputError = outputErrorSeq[0]
 
         for (layerIndex in network.size - 1 downTo 1) {
             val layer = network.layerAt(layerIndex)
@@ -32,15 +37,15 @@ open class SGD(private var eta: Double = 0.01) {
             val layerError = neuronErrors[layerIndex]
             var weightOffset = 0
             val activation = layer.output
-            val prevActivation = layer.prevLayer!!.output
+            val prevActivation = layer.inputLayer!!.output[0] // TODO index of first seq element -> output[0]
 
             val isOutputLayer = layerIndex == network.size - 1
 
             val nextLayer = if (!isOutputLayer) network.layerAt(layerIndex + 1) else null
             val nextLayerError = if (!isOutputLayer) neuronErrors[layerIndex + 1] else null
-            val nextWeightStep = activation.size + (if (nextLayer?.hasBias == true) 1 else 0)
+            val nextWeightStep = activation[0].size + (if (nextLayer?.hasBias == true) 1 else 0) // TODO index of first seq element -> activation[0]
 
-            for (i in 0 until activation.size) {
+            for (i in 0 until activation[0].size) { // TODO index of first seq element -> activation[0]
                 var deltaError = if (isOutputLayer) {
                     outputError[i]
                 } else {
@@ -52,10 +57,10 @@ open class SGD(private var eta: Double = 0.01) {
                     }
                 }
 
-                deltaError *= layer.activationDerivative(i)
+                deltaError *= layer.activationDerivative(0, i)
                 layerError[i] = deltaError
                 if (layer.isTrainable()) {
-                    for (j in 0 until layer.prevLayer.size) {
+                    for (j in 0 until layer.inputLayer.outputWidth) {
                         layerGradients[weightOffset++] += eta * deltaError * prevActivation[j]
                     }
                     if (layer.hasBias) {

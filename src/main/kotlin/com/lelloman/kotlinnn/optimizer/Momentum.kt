@@ -4,7 +4,7 @@ import java.util.*
 
 class Momentum(eta: Double = 0.01, private val momentum: Double) : SGD(eta) {
 
-    private val prevWeightGradients by lazy {
+    internal val prevWeightGradients by lazy {
         Array(network.size, { DoubleArray(weightGradients[it].size) })
     }
 

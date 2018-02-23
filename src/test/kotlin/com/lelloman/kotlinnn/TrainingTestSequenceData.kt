@@ -1,5 +1,6 @@
 package com.lelloman.kotlinnn
 
+import com.lelloman.kotlinnn.dataset.DataSetV2
 import com.lelloman.kotlinnn.loss.Loss
 import com.lelloman.kotlinnn.loss.LossFunction
 import com.lelloman.kotlinnn.optimizer.SGD
@@ -7,19 +8,31 @@ import com.nhaarman.mockito_kotlin.*
 import org.junit.Before
 import org.junit.Test
 
-class TrainingTest {
+class TrainingTestSequenceData {
 
     private val network: Network = mock()
 
     private val trainingSetSize = 100
     private val validationSetSize = 10
     private val dataDimension = 3
+    private val inputSeqLength = 2
+    private val outputSeqLength = 3
 
-    private val trainingSet = spy(DataSet.Builder(trainingSetSize)
-            .add { _ -> DoubleArray(dataDimension) to DoubleArray(dataDimension) }
+    private val trainingSet = spy(DataSetV2.Builder(trainingSetSize)
+            .add { _ ->
+                DataSample(
+                        Array(inputSeqLength, { DoubleArray(dataDimension) }),
+                        Array(outputSeqLength, { DoubleArray(dataDimension) })
+                )
+            }
             .build())
-    private val validationSet = DataSet.Builder(validationSetSize)
-            .add { _ -> DoubleArray(dataDimension) to DoubleArray(dataDimension) }
+    private val validationSet = DataSetV2.Builder(validationSetSize)
+            .add { _ ->
+                DataSample(
+                        Array(inputSeqLength, { DoubleArray(dataDimension) }),
+                        Array(outputSeqLength, { DoubleArray(dataDimension) })
+                )
+            }
             .build()
 
     private val callback: Training.EpochCallback = mock()
@@ -34,10 +47,10 @@ class TrainingTest {
     @Before
     fun setUp() {
         whenever(loss.factory).thenReturn({ lossFunction })
-        whenever(network.output).thenReturn(DoubleArray(dataDimension))
-        whenever(network.forwardPass(any())).thenReturn(DoubleArray(dataDimension))
+        whenever(network.output).thenReturn(arrayOf(DoubleArray(dataDimension)))
+        whenever(network.forwardPass(any())).thenReturn(arrayOf(DoubleArray(dataDimension)))
         whenever(lossFunction.getEpochLoss()).thenReturn(0.0)
-        whenever(lossFunction.onEpochSample(any(), any())).thenReturn(DoubleArray(0))
+        whenever(lossFunction.onEpochSample(any(), any())).thenReturn(arrayOf(DoubleArray(0)))
     }
 
     @Test
@@ -88,7 +101,7 @@ class TrainingTest {
         verify(callback, epochsTimes).shouldEndTraining(any(), any())
         verify(callback, epochsTimes).onEpoch(any(), any(), any(), any())
 
-        verify(lossFunction, epochsTimes).onEpochStarted(any(), any())
+        verify(lossFunction, epochsTimes).onEpochStarted(any(), any(), any())
         verify(lossFunction, epochsTimes).compute(network, validationSet)
         verify(lossFunction, epochsTimes).getEpochLoss()
 

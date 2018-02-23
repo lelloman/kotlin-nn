@@ -1,25 +1,23 @@
 package com.lelloman.kotlinnn.layer
 
 import com.lelloman.kotlinnn.activation.Activation
-import com.lelloman.kotlinnn.activation.LayerActivation
-import com.lelloman.kotlinnn.activation.LogisticActivation
 
 open class DenseLayer(size: Int,
-                      prevLayer: Layer,
+                      inputLayer: Layer,
                       hasBias: Boolean = true,
                       activation: Activation = Activation.LOGISTIC,
                       private val weightsInitializer: WeightsInitializer = GaussianWeightsInitializer(0.0, 0.3))
-    : Layer(size, prevLayer, hasBias, activation.factory) {
+    : Layer(1, size, inputLayer, hasBias, activation.factory) {
 
     private val z = DoubleArray(size)
 
     override val weightsSize: Int by lazy { weights.size }
-    private val weights: DoubleArray = DoubleArray(size * prevLayer!!.size + (if (hasBias) size else 0), { 0.0 })
+    private val weights: DoubleArray = DoubleArray(size * inputLayer!!.outputWidth + (if (hasBias) size else 0), { 0.0 })
 
     override fun setWeights(weights: DoubleArray) {
-        if (weights.size != this.weights.size) {
-            throw IllegalArgumentException("Weights size is supposed to be ${this.weights.size} for this layer but" +
-                    "argument has size ${weights.size}")
+        if (weights.size != this.weightsSize) {
+            throw IllegalArgumentException("Weights inputWidth is supposed to be $weightsSize for this layer but" +
+                    "argument has inputWidth ${weights.size}")
         }
 
         System.arraycopy(weights, 0, this.weights, 0, weights.size)
@@ -28,9 +26,9 @@ open class DenseLayer(size: Int,
     override fun initializeWeights() = weightsInitializer.initialize(this.weights)
 
     override fun deltaWeights(delta: DoubleArray) {
-        if (weights.size != delta.size) {
-            throw IllegalArgumentException("Weight updates size is supposed to be ${weights.size} for this layer but" +
-                    "argument has size ${delta.size}")
+        if (weightsSize != delta.size) {
+            throw IllegalArgumentException("Weight updates inputWidth is supposed to be $weightsSize for this layer but" +
+                    "argument has inputWidth ${delta.size}")
         }
 
         delta.forEachIndexed { index, d -> weights[index] += d }
@@ -38,14 +36,16 @@ open class DenseLayer(size: Int,
 
     override fun weightAt(index: Int) = weights[index]
 
+    override fun copyWeights() = weights.clone()
+
     override fun computeActivation() {
-        val prevActivation = prevLayer!!.output
-        val prevSize = prevActivation.size
+        val input = inputLayer!!.output[0]
+        val inputSize = input.size
 
         var weightOffset = 0
 
-        for (i in 0 until size) {
-            var v = (0 until prevSize).sumByDouble { prevActivation[it] * weights[weightOffset++] }
+        for (i in 0 until outputWidth) {
+            var v = (0 until inputSize).sumByDouble { input[it] * weights[weightOffset++] }
             if (hasBias) {
                 v += weights[weightOffset++]
             }
@@ -53,11 +53,11 @@ open class DenseLayer(size: Int,
         }
 
         if (isTraining) {
-            activation.performWithDerivative(z)
+            activation.performWithDerivative(0, z)
         } else {
-            activation.perform(z)
+            activation.perform(0, z)
         }
     }
 
-    override fun activationDerivative(index: Int) = activation.derivative(index)
+    override fun activationDerivative(sequenceIndex: Int, index: Int) = activation.derivative(sequenceIndex, index)
 }

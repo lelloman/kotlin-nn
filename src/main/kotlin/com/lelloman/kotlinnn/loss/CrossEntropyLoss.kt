@@ -1,38 +1,41 @@
 package com.lelloman.kotlinnn.loss
 
-import com.lelloman.kotlinnn.DataSet
 import com.lelloman.kotlinnn.Network
+import com.lelloman.kotlinnn.dataset.DataSet
 
 internal class CrossEntropyLoss : LossFunction {
 
     internal var loss = 0.0
     internal var dataSetSize = 0
-    internal lateinit var gradients: DoubleArray
+    internal lateinit var gradients: Array<DoubleArray>
 
-    override fun onEpochStarted(outputSize: Int, dataSetSize: Int) {
+    override fun onEpochStarted(sequenceLength: Int, outputSize: Int, dataSetSize: Int) {
         this.dataSetSize = dataSetSize
-        gradients = DoubleArray(outputSize)
+        gradients = Array(sequenceLength, { DoubleArray(outputSize) })
         loss = 0.0
     }
 
-    override fun onEpochSample(activation: DoubleArray, target: DoubleArray): DoubleArray {
-        val sum = activation.mapIndexed { index, y ->
-            val t = target[index]
-            val oneMinusY = (1 - y)
+    override fun onEpochSample(activationSequence: Array<DoubleArray>, targetSequence: Array<DoubleArray>): Array<DoubleArray> {
+        (0 until activationSequence.size).forEach { sequenceIndex ->
+            val activation = activationSequence[sequenceIndex]
+            val target = targetSequence[sequenceIndex]
+            val gradients = gradients[sequenceIndex]
+            loss += activation.mapIndexed { index, y ->
+                val t = target[index]
+                val oneMinusY = 1 - y
 
-            gradients[index] = -(y - t) / ((y * oneMinusY) + EPSILON)
-            val output = -t * Math.log(y + EPSILON) - (1 - t) * Math.log(oneMinusY + EPSILON)
-            output
-        }.sum()
-        loss += sum / dataSetSize
+                gradients[index] = -(y - t) / ((y * oneMinusY) + EPSILON)
+                -t * Math.log(y + EPSILON) - (1 - t) * Math.log(oneMinusY + EPSILON)
+            }.sum() / dataSetSize
+        }
         return gradients
     }
 
     override fun getEpochLoss(): Double = loss
 
     override fun compute(network: Network, dataSet: DataSet): Double {
-        onEpochStarted(network.output.size, dataSet.size)
-        dataSet.map { inSample, outSample ->
+        onEpochStarted(dataSet.outputDimension.first, dataSet.outputDimension.second, dataSet.size)
+        dataSet.samples.map { (inSample, outSample) ->
             onEpochSample(network.forwardPass(inSample), outSample)
         }
         return loss

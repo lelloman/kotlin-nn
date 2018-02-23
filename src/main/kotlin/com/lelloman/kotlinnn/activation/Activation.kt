@@ -1,9 +1,10 @@
 package com.lelloman.kotlinnn.activation
 
-enum class Activation(val factory: (Int) -> LayerActivation) {
+enum class Activation(val factory: (Int, Int) -> LayerActivation) {
     LOGISTIC(::LogisticActivation),
     TANH(::TanhActivation),
     RELU(::ReluActivation),
     LEAKY_RELU(::LeakyReluActivation),
-    SOFTMAX(::SoftmaxActivation)
+    SOFTMAX(::SoftmaxActivation),
+    IDENTITY(::IdentityActivation)
 }
