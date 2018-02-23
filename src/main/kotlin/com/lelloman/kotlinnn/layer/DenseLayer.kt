@@ -12,7 +12,7 @@ open class DenseLayer(size: Int,
     private val z = DoubleArray(size)
 
     override val weightsSize: Int by lazy { weights.size }
-    private val weights: DoubleArray = DoubleArray(size * inputLayer!!.inputWidth + (if (hasBias) size else 0), { 0.0 })
+    private val weights: DoubleArray = DoubleArray(size * inputLayer!!.outputWidth + (if (hasBias) size else 0), { 0.0 })
 
     override fun setWeights(weights: DoubleArray) {
         if (weights.size != this.weightsSize) {
@@ -42,7 +42,7 @@ open class DenseLayer(size: Int,
 
         var weightOffset = 0
 
-        for (i in 0 until inputWidth) {
+        for (i in 0 until outputWidth) {
             var v = (0 until inputSize).sumByDouble { input[it] * weights[weightOffset++] }
             if (hasBias) {
                 v += weights[weightOffset++]

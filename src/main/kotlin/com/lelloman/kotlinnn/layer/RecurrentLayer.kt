@@ -23,7 +23,7 @@ class RecurrentLayer(
     private val z = DoubleArray(size)
     private val prevActivation = DoubleArray(size)
 
-    private val weightsW: DoubleArray = DoubleArray(size * inputLayer!!.inputWidth + (if (hasBias) size else 0), { 0.0 })
+    private val weightsW: DoubleArray = DoubleArray(size * inputLayer!!.outputWidth + (if (hasBias) size else 0), { 0.0 })
     private val weightsU: DoubleArray = DoubleArray(size * size, { 0.0 })
 
     override val weightsSize: Int = weightsW.size + weightsU.size
@@ -67,7 +67,7 @@ class RecurrentLayer(
 
         var weightOffsetW = 0
 
-        for (i in 0 until inputWidth) {
+        for (i in 0 until outputWidth) {
             var v = (0 until inputSize).sumByDouble { input[it] * weightsW[weightOffsetW++] }
             if (hasBias) {
                 v += weightsW[weightOffsetW++]
@@ -76,8 +76,8 @@ class RecurrentLayer(
         }
 
         var weightOffsetU = 0
-        for (i in 0 until inputWidth) {
-            z[i] += (0 until inputWidth).sumByDouble { prevActivation[it] * weightsU[weightOffsetU++] }
+        for (i in 0 until outputWidth) {
+            z[i] += (0 until outputWidth).sumByDouble { prevActivation[it] * weightsU[weightOffsetU++] }
         }
 
         if (isTraining) {
@@ -86,7 +86,7 @@ class RecurrentLayer(
             activation.perform(0, z)
         }
 
-        System.arraycopy(output[0], 0, prevActivation, 0, inputWidth)
+        System.arraycopy(output[0], 0, prevActivation, 0, outputWidth)
     }
 
     override fun activationDerivative(sequenceIndex: Int, index: Int) = activation.derivative(sequenceIndex, index)

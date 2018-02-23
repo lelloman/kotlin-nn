@@ -64,7 +64,7 @@ class AutoEncoderTest {
 
         ks.forEach { k ->
             val wave = DoubleArray(waveSampleSize, { Math.sin(it * k) })
-            val reconstructed = network.forwardPass(arrayOf(wave))
+            val reconstructed = network.forwardPass(arrayOf(wave))[0]
             val a = Array(wave.size, { "%+.2f".format(wave[it]) })
             val b = Array(wave.size, { "%+.2f".format(reconstructed[it]) })
             println("original: ${a.joinToString(",")}")

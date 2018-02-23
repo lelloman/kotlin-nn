@@ -42,7 +42,7 @@ class SGDTest {
 
     @Test
     fun `when train on sample does not touch input layer`() {
-        //initialize lazy fields
+        // initialize lazy fields
         sgd.trainOnSample(arrayOf(doubleArrayOf(0.0, 0.0)))
         reset(network)
 
@@ -55,7 +55,7 @@ class SGDTest {
 
     @Test
     fun `updates weights`() {
-        // nitialize lazy fields
+        // initialize lazy fields
         sgd.updateWeights()
         reset(network.layerAt(0))
         reset(network.layerAt(1))
@@ -75,30 +75,30 @@ class SGDTest {
     @Test
     fun `computes layers gradients`() {
         val outputError = doubleArrayOf(0.2, 0.4)
-        val inputActivation = arrayOf(doubleArrayOf(0.12345, 0.54321))
-        val hiddenActivation = arrayOf(doubleArrayOf(0.333, 0.666))
-        whenever(inputLayer.output).thenReturn(inputActivation)
-        whenever(hiddenLayer.output).thenReturn(hiddenActivation)
+        val inputActivation = doubleArrayOf(0.12345, 0.54321)
+        val hiddenActivation = doubleArrayOf(0.333, 0.666)
+        whenever(inputLayer.output).thenReturn(arrayOf(inputActivation))
+        whenever(hiddenLayer.output).thenReturn(arrayOf(hiddenActivation))
         whenever(hiddenLayer.activationDerivative(any(), any())).thenReturn(1.0)
         whenever(outputLayer.activationDerivative(any(), any())).thenReturn(1.0)
-        val expectedOutputGradients = arrayOf(doubleArrayOf(
-                outputError[0] * hiddenActivation[0][0] * eta,
-                outputError[0] * hiddenActivation[0][1] * eta,
+        val expectedOutputGradients = doubleArrayOf(
+                outputError[0] * hiddenActivation[0] * eta,
+                outputError[0] * hiddenActivation[1] * eta,
                 outputError[0] * 1 * eta,
-                outputError[1] * hiddenActivation[0][0] * eta,
-                outputError[1] * hiddenActivation[0][1] * eta,
+                outputError[1] * hiddenActivation[0] * eta,
+                outputError[1] * hiddenActivation[1] * eta,
                 outputError[1] * 1 * eta
-        ))
+        )
         val expectedHiddenError = doubleArrayOf(
                 outputError[0] * outputLayerWeights[0] + outputError[1] * outputLayerWeights[3],
                 outputError[0] * outputLayerWeights[1] + outputError[1] * outputLayerWeights[4]
         )
         val expectedHiddenGradients = doubleArrayOf(
-                expectedHiddenError[0] * inputActivation[0][0] * eta,
-                expectedHiddenError[0] * inputActivation[0][1] * eta,
+                expectedHiddenError[0] * inputActivation[0] * eta,
+                expectedHiddenError[0] * inputActivation[1] * eta,
                 expectedHiddenError[0] * 1 * eta,
-                expectedHiddenError[1] * inputActivation[0][0] * eta,
-                expectedHiddenError[1] * inputActivation[0][1] * eta,
+                expectedHiddenError[1] * inputActivation[0] * eta,
+                expectedHiddenError[1] * inputActivation[1] * eta,
                 expectedHiddenError[1] * 1 * eta
         )
 
