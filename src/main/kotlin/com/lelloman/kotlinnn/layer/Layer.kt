@@ -22,6 +22,7 @@ abstract class Layer(
     abstract fun initializeWeights()
     abstract fun deltaWeights(delta: DoubleArray)
     abstract fun weightAt(index: Int): Double
+    abstract fun copyWeights(): DoubleArray
 
     fun setActivation(activation: Array<DoubleArray>) {
         System.arraycopy(activation, 0, this.activation.output, 0, activation.size)

@@ -36,6 +36,8 @@ open class DenseLayer(size: Int,
 
     override fun weightAt(index: Int) = weights[index]
 
+    override fun copyWeights() = weights.clone()
+
     override fun computeActivation() {
         val input = inputLayer!!.output[0]
         val inputSize = input.size

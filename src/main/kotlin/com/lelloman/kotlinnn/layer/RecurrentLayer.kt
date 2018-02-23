@@ -59,6 +59,10 @@ class RecurrentLayer(
         weightsU[index - weightsW.size]
     }
 
+    override fun copyWeights(): DoubleArray {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
     override fun computeActivation() {
         if (!returnSequence) TODO("RecurrentLayer not returning sequences is not implemented yet")
 

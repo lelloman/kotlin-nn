@@ -25,6 +25,10 @@ class InputLayer(sequenceLength: Int, size: Int)
         throw RuntimeException("Cannot get weights from an InputLayer")
     }
 
+    override fun copyWeights(): DoubleArray {
+        throw RuntimeException("Cannot get weights from an InputLayer")
+    }
+
     override fun computeActivation() {
         throw RuntimeException("Cannot compute activation of an InputLayer")
     }
