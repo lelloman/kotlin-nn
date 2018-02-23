@@ -16,8 +16,8 @@ class TrainingIntegrationTest {
 
     private val lossThreshold = 0.001
 
-    private val trainingSet by lazy { xorDataSet(10000) }
-    private val validationSet by lazy { xorDataSet(100) }
+    private val trainingSet by lazy { xorDataSet(10000, random) }
+    private val validationSet by lazy { xorDataSet(100, random) }
 
     private val logisticNetwork = makeNetwork(Activation.LOGISTIC, GaussianWeightsInitializer(0.0, 0.3, random = random))
     private val leakyReluNetwork = makeNetwork(Activation.LEAKY_RELU, GaussianWeightsInitializer(0.5, 0.2, random = random))
